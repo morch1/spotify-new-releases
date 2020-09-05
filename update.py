@@ -10,30 +10,18 @@ from pprint import pprint
 from dotenv import load_dotenv
 
 
-def get_my_followed_artists(sp):
+def run(username, country, playlist_id, num_tracks):
+    token = util.prompt_for_user_token(username, 'playlist-modify-private playlist-modify-public user-follow-read')
+    sp = spotipy.Spotify(auth=token)
+
+    print('getting followed artists...')
+
     followed_artists = []
     artists = sp.current_user_followed_artists()['artists']
     while artists:
         for artist in artists['items']:
             followed_artists.append(artist['id'])
         artists = sp.next(artists)['artists'] if artists['next'] else None
-    return followed_artists
-
-
-def get_someones_followed_artists():
-    raise NotImplementedError
-
-
-def run(username, country, playlist_id, num_tracks, for_user):
-    token = util.prompt_for_user_token(username, 'playlist-modify-private playlist-modify-public user-follow-read')
-    sp = spotipy.Spotify(auth=token)
-
-    print('getting followed artists...')
-
-    if for_user is None:
-        followed_artists = get_my_followed_artists(sp)
-    else:
-        followed_artists = get_someones_followed_artists()
 
     print('getting playlisted tracks...')
 
@@ -122,14 +110,13 @@ def main():
     parser.add_argument('country')
     parser.add_argument('playlist_id')
     parser.add_argument('--num_tracks', type=int, default=30)
-    parser.add_argument('--for_user', default=None)
     parser.add_argument('--dotenv', action='store_true')
     args = parser.parse_args()
 
     if args.dotenv:
         load_dotenv()
 
-    run(args.username, args.country, args.playlist_id, args.num_tracks, args.for_user)
+    run(args.username, args.country, args.playlist_id, args.num_tracks)
 
 
 if __name__ == '__main__':
