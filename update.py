@@ -34,7 +34,6 @@ def run(username, country, playlist_id, num_tracks):
             playlisted_tracks.append((song['track']['id'], song['track']['album']['id']))
         songs = sp.next(songs) if songs['next'] else None
 
-
     print('getting new albums...')
 
     bar = progressbar.ProgressBar(maxval=len(followed_artists))
