@@ -1,2 +1,2 @@
-# spotify-new-releases
-script that updates a playlist with recent releases from followed artists
+# spotify-utils
+some useful spotify related scripts

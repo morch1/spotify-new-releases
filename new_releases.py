@@ -1,17 +1,11 @@
-import argparse
-import os
 import spotipy
-import spotipy.util as util
 import random
 import time
 import progressbar
 from datetime import datetime, timedelta
-from pprint import pprint
-from dotenv import load_dotenv
 
 
-def run(username, country, playlist_id, num_tracks):
-    token = util.prompt_for_user_token(username, 'playlist-modify-private playlist-modify-public user-follow-read')
+def update(token, username, country, playlist_id, num_tracks):
     sp = spotipy.Spotify(auth=token)
 
     print('getting followed artists...')
@@ -101,22 +95,3 @@ def run(username, country, playlist_id, num_tracks):
     bar.finish()
 
     print('added', len(to_add), 'removed', len(to_remove))
-
-
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('username')
-    parser.add_argument('country')
-    parser.add_argument('playlist_id')
-    parser.add_argument('--num_tracks', type=int, default=30)
-    parser.add_argument('--dotenv', action='store_true')
-    args = parser.parse_args()
-
-    if args.dotenv:
-        load_dotenv()
-
-    run(args.username, args.country, args.playlist_id, args.num_tracks)
-
-
-if __name__ == '__main__':
-    main()
