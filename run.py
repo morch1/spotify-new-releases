@@ -30,6 +30,7 @@ def main():
     find_common_songs_parser.add_argument('playlist1')
     find_common_songs_parser.add_argument('playlist2')
     find_common_songs_parser.add_argument('--by_name', action='store_true')
+    find_common_songs_parser.add_argument('--by_name_part', action='store_true')
     find_common_songs_parser.add_argument('--find_missing', action='store_true')
 
     args = parser.parse_args()
@@ -47,7 +48,7 @@ def main():
     elif args.command == 'on_this_day':
         on_this_day.update(token, args.lastfm_username, args.playlist_ids)
     elif args.command == 'find_common_songs':
-        find_common_songs.run(token, args.username, args.playlist1, args.playlist2, args.by_name, args.find_missing)
+        find_common_songs.run(token, args.username, args.playlist1, args.playlist2, args.by_name, args.by_name_part, args.find_missing)
 
 
 if __name__ == '__main__':
