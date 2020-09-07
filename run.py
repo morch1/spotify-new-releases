@@ -1,9 +1,7 @@
 import argparse
 import spotipy
 import spotipy.util as util
-import new_releases
-import on_repeat
-import on_this_day
+from scripts import new_releases, on_repeat, on_this_day
 
 SCOPE = 'playlist-read-private playlist-read-collaborative user-library-read playlist-modify-private playlist-modify-public user-follow-read'
 
@@ -23,7 +21,6 @@ def main():
     on_repeat_parser = subparsers.add_parser('on_repeat')
     on_repeat_parser.add_argument('on_repeat_id')
     on_repeat_parser.add_argument('playlist_id')
-    on_repeat_parser.add_argument('--liked_only', action='store_true')
 
     on_this_day_parser = subparsers.add_parser('on_this_day')
     on_this_day_parser.add_argument('lastfm_username')
@@ -40,7 +37,7 @@ def main():
     if args.command == 'new_releases':
         new_releases.update(token, args.country, args.playlist_id, args.num_tracks)
     elif args.command == 'on_repeat':
-        on_repeat.update(token, args.on_repeat_id, args.playlist_id, args.liked_only)
+        on_repeat.update(token, args.on_repeat_id, args.playlist_id)
     elif args.command == 'on_this_day':
         on_this_day.update(token, args.lastfm_username, args.playlist_ids)
 
