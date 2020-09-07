@@ -1,35 +1,75 @@
 import spotipy
+import time
+import progressbar
+
+class Track:
+    def __init__(self, song):
+        self.artist_id = song['track']['artists'][0]['id']
+        self.name = song['track']['name'].lower()
+        self.id = song['track']['id']
+
+    def __hash__(self):
+        return hash(self.artist_id + self.name)
+
+    def __eq__(self, other):
+        return hash(self) == hash(other)
 
 
-def update(token, username, on_repat_id, playlist_id, liked_only):
+def update(token, on_repat_id, playlist_id, liked_only):
     sp = spotipy.Spotify(auth=token)
 
-    saved_tracks = []
-    songs = sp.current_user_saved_tracks()
-    while songs:
-        for song in songs['items']:
-            saved_tracks.append((song['track']['artists'][0]['id'], song['track']['name'].lower()))
-        songs = sp.next(songs) if songs['next'] else None
+    if liked_only:
+        print('getting saved tracks...')
+
+        saved_tracks = set()
+        songs = sp.current_user_saved_tracks()
+        while songs:
+            for song in songs['items']:
+                saved_tracks.add(Track(song))
+            songs = sp.next(songs) if songs['next'] else None
+
+    print('getting playlisted tracks...')
     
-    playlisted_tracks = set()
-    songs = sp.user_playlist(username, playlist_id)['tracks']
+    playlisted_tracks = []
+    songs = sp.playlist(playlist_id)['tracks']
     while songs:
         for song in songs['items']:
-            playlisted_tracks.add(song['track']['id'])
+            playlisted_tracks.append(Track(song))
         songs = sp.next(songs) if songs['next'] else None
 
-    new_tracks = set()
-    songs = sp.user_playlist(username, on_repat_id)['tracks']
+    print('getting tracks from On Repeat...')
+
+    onrepeat_tracks = []
+    songs = sp.playlist(on_repat_id)['tracks']
     while songs:
         for song in songs['items']:
-            if song['track']['id'] not in playlisted_tracks and (not liked_only or any(song['track']['artists'][0]['id'] == ss[0] and (song['track']['name'].lower() in ss[1] or ss[1] in song['track']['name'].lower()) for ss in saved_tracks)):
-                new_tracks.add(song['track']['id'])
+            onrepeat_tracks.append(Track(song))
         songs = sp.next(songs) if songs['next'] else None
 
-    new_tracks = list(new_tracks)
+    print('updating playlist...')
 
-    if len(new_tracks) > 0:
-        for i in range(0, len(new_tracks) // 100 + 1):
-            sp.user_playlist_add_tracks(username, playlist_id, new_tracks[i * 100 : (i + 1) * 100])
+    n_added = 0
+    n_moved = 0
+    
+    bar = progressbar.ProgressBar(maxval=len(onrepeat_tracks))
+    bar.start()
+    for i, track in enumerate(onrepeat_tracks):
+        bar.update(i)
+        if liked_only and track not in saved_tracks:
+            continue
+        try:
+            j = playlisted_tracks.index(track)
+            # print(track.name, i, j)
+            if j != i:
+                time.sleep(1)
+                sp.playlist_reorder_items(playlist_id, j, i)
+                playlisted_tracks.insert(i, playlisted_tracks.pop(j))
+                n_moved += 1
+        except ValueError:
+            time.sleep(1)
+            sp.playlist_add_items(playlist_id, [track.id], i)
+            playlisted_tracks.insert(i, track)
+            n_added += 1
+    bar.finish()
 
-    print('added', len(new_tracks))
+    print('added', n_added, 'reordered', n_moved)

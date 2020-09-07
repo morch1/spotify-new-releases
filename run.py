@@ -40,7 +40,7 @@ def main():
     if args.command == 'new_releases':
         new_releases.update(token, args.username, args.country, args.playlist_id, args.num_tracks)
     elif args.command == 'on_repeat':
-        on_repeat.update(token, args.username, args.on_repeat_id, args.playlist_id, args.liked_only)
+        on_repeat.update(token, args.on_repeat_id, args.playlist_id, args.liked_only)
     elif args.command == 'on_this_day':
         on_this_day.update(token, args.username, args.lastfm_username, args.playlist_ids)
 
