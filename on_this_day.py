@@ -5,7 +5,7 @@ import spotipy
 from datetime import datetime, timedelta, date
 
 
-def update(token, username, lastfm_username, playlist_ids):
+def update(token, lastfm_username, playlist_ids):
     lfm_network = pylast.LastFMNetwork(api_key=os.getenv('PYLAST_API_KEY'), api_secret=os.getenv('PYLAST_API_SECRET'))
     lfm_user = lfm_network.get_user(lastfm_username)
     sp = spotipy.Spotify(auth=token)
@@ -33,5 +33,5 @@ def update(token, username, lastfm_username, playlist_ids):
                 spotify_tracks.append(sr['tracks']['items'][0]['id'])
         spotify_tracks.reverse()
 
-        sp.user_playlist_replace_tracks(username, playlist_id, spotify_tracks)
-        sp.user_playlist_change_details(username, playlist_id, description=f'nutki słuchane {start.strftime("%A, %B %d, %Y")}')
+        sp.playlist_replace_items(playlist_id, spotify_tracks)
+        sp.playlist_change_details(playlist_id, description=f'nutki słuchane {start.strftime("%A, %B %d, %Y")}')

@@ -38,11 +38,11 @@ def main():
     token = util.prompt_for_user_token(args.username, SCOPE)
 
     if args.command == 'new_releases':
-        new_releases.update(token, args.username, args.country, args.playlist_id, args.num_tracks)
+        new_releases.update(token, args.country, args.playlist_id, args.num_tracks)
     elif args.command == 'on_repeat':
         on_repeat.update(token, args.on_repeat_id, args.playlist_id, args.liked_only)
     elif args.command == 'on_this_day':
-        on_this_day.update(token, args.username, args.lastfm_username, args.playlist_ids)
+        on_this_day.update(token, args.lastfm_username, args.playlist_ids)
 
 
 if __name__ == '__main__':
