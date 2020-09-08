@@ -5,7 +5,7 @@ import progressbar
 from datetime import datetime, timedelta
 
 
-def update(token, country, playlist_id, num_tracks):
+def update(token, dry, country, playlist_id, num_tracks):
     sp = spotipy.Spotify(auth=token)
 
     print('getting followed artists...')
@@ -75,7 +75,7 @@ def update(token, country, playlist_id, num_tracks):
     new_albums = [a[0] for a in new_albums]
     to_remove = [t[0] for t in playlisted_tracks if t[1] not in new_albums]
 
-    if len(to_remove) > 0:
+    if not dry and len(to_remove) > 0:
         sp.playlist_remove_all_occurrences_of_items(playlist_id, to_remove)
 
     to_add = []
@@ -86,12 +86,13 @@ def update(token, country, playlist_id, num_tracks):
     if len(playlisted_albums) == 0:
         to_add = list(reversed(to_add))
 
-    bar = progressbar.ProgressBar(maxval=len(to_add))
-    bar.start()
-    for j, (t, i) in enumerate(to_add):
-        time.sleep(1)
-        sp.playlist_add_items(playlist_id, [t], position=i)
-        bar.update(j)
-    bar.finish()
+    if not dry:
+        bar = progressbar.ProgressBar(maxval=len(to_add))
+        bar.start()
+        for j, (t, i) in enumerate(to_add):
+            time.sleep(1)
+            sp.playlist_add_items(playlist_id, [t], position=i)
+            bar.update(j)
+        bar.finish()
 
     print('added', len(to_add), 'removed', len(to_remove))

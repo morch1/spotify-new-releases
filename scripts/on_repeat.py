@@ -3,7 +3,7 @@ import time
 import progressbar
 
 
-def update(token, on_repat_id, playlist_id):
+def update(token, dry, on_repat_id, playlist_id):
     sp = spotipy.Spotify(auth=token)
 
     print('getting playlisted tracks...')
@@ -37,12 +37,14 @@ def update(token, on_repat_id, playlist_id):
             j = playlisted_tracks.index(track)
             if j != i:
                 time.sleep(1)
-                sp.playlist_reorder_items(playlist_id, j, i)
+                if not dry:
+                    sp.playlist_reorder_items(playlist_id, j, i)
                 playlisted_tracks.insert(i, playlisted_tracks.pop(j))
                 n_moved += 1
         except ValueError:
             time.sleep(1)
-            sp.playlist_add_items(playlist_id, track, i)
+            if not dry:
+                sp.playlist_add_items(playlist_id, track, i)
             playlisted_tracks.insert(i, track)
             n_added += 1
     bar.finish()
