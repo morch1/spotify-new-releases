@@ -5,7 +5,12 @@ import spotipy
 from datetime import datetime, timedelta, date
 
 
-def update(token, dry, lastfm_username, playlist_ids):
+def init(parser):
+    parser.add_argument('lastfm_username')
+    parser.add_argument('playlist_ids', nargs='+')
+
+
+def run(token, dry, lastfm_username, playlist_ids, **_):
     lfm_network = pylast.LastFMNetwork(api_key=os.getenv('PYLAST_API_KEY'), api_secret=os.getenv('PYLAST_API_SECRET'))
     lfm_user = lfm_network.get_user(lastfm_username)
     sp = spotipy.Spotify(auth=token)

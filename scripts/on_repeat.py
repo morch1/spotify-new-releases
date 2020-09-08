@@ -3,7 +3,12 @@ import time
 import progressbar
 
 
-def update(token, dry, on_repat_id, playlist_id):
+def init(parser):
+    parser.add_argument('on_repeat_id')
+    parser.add_argument('playlist_id')
+
+
+def run(token, dry, on_repeat_id, playlist_id, **_):
     sp = spotipy.Spotify(auth=token)
 
     print('getting playlisted tracks...')
@@ -18,7 +23,7 @@ def update(token, dry, on_repat_id, playlist_id):
     print('getting tracks from On Repeat...')
 
     onrepeat_tracks = []
-    songs = sp.playlist(on_repat_id)['tracks']
+    songs = sp.playlist(on_repeat_id)['tracks']
     while songs:
         for song in songs['items']:
             onrepeat_tracks.append(song['track']['id'])

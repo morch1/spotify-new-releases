@@ -3,11 +3,13 @@ import re
 import itertools
 
 
-REMIX_REGEX = re.compile(r".*(?: - | \(| \[)(.*)(?:remix| mix|cover|remastered|remaster|edit|live|instrumental)")
+def init(parser):
+    parser.add_argument('playlist_id')
 
 
-def run(token, dry, playlist_id):
+def run(token, dry, playlist_id, **_):
     sp = spotipy.Spotify(auth=token)
+    remix_regex = re.compile(r".*(?: - | \(| \[)(.*)(?:remix| mix|cover|remastered|remaster|edit|live|instrumental)")
 
     print('getting playlisted tracks...')
     
@@ -17,7 +19,7 @@ def run(token, dry, playlist_id):
         for song in songs['items']:
             name = song['track']['name'].lower()
             shortname = name.split(' - ')[0].split(' (')[0].split(' [')[0]
-            remix_re = re.search(REMIX_REGEX, name)
+            remix_re = re.search(remix_regex, name)
             rmxartist = remix_re.group(1) if remix_re else None
             tracks.append((song['track']['id'], song['track']['artists'][0]['name'], name, shortname, rmxartist, song['added_at'], song['added_by']['id']))
         songs = sp.next(songs) if songs['next'] else None

@@ -5,7 +5,13 @@ import progressbar
 from datetime import datetime, timedelta
 
 
-def update(token, dry, country, playlist_id, num_tracks):
+def init(parser):
+    parser.add_argument('country')
+    parser.add_argument('playlist_id')
+    parser.add_argument('--num_tracks', type=int, default=30)
+
+
+def run(token, dry, country, playlist_id, num_tracks, **_):
     sp = spotipy.Spotify(auth=token)
 
     print('getting followed artists...')

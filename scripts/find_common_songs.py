@@ -3,7 +3,15 @@ import spotipy
 from datetime import datetime
 
 
-def run(token, dry, username, playlist1, playlist2, by_name, by_name_part, find_missing):
+def init(parser):
+    parser.add_argument('playlist_id')
+    parser.add_argument('config_path')
+    parser.add_argument('--check_albums', action='store_true')
+    parser.add_argument('--by_name', action='store_true')
+    parser.add_argument('--by_name_part', action='store_true')
+
+
+def run(token, dry, username, playlist1, playlist2, by_name, by_name_part, find_missing, **_):
     sp = spotipy.Spotify(auth=token)
 
     tracks1 = {}
