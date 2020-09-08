@@ -1,7 +1,7 @@
 import argparse
 import spotipy
 import spotipy.util as util
-from scripts import new_releases, on_repeat, on_this_day, find_common_songs, likes_playlist
+from scripts import new_releases, on_repeat, on_this_day, find_common_songs, likes_playlist, remove_duplicates
 
 SCOPE = 'playlist-read-private playlist-read-collaborative user-library-read playlist-modify-private playlist-modify-public user-follow-read'
 
@@ -41,6 +41,9 @@ def main():
     likes_playlist_parser.add_argument('--by_name', action='store_true')
     likes_playlist_parser.add_argument('--by_name_part', action='store_true')
 
+    remove_duplicates_parser = subparsers.add_parser('remove_duplicates')
+    remove_duplicates_parser.add_argument('playlist_id')
+
     args = parser.parse_args()
     
     if args.dotenv:
@@ -59,6 +62,8 @@ def main():
         find_common_songs.run(token, args.dry, args.username, args.playlist1, args.playlist2, args.by_name, args.by_name_part, args.find_missing)
     elif args.command == 'likes_playlist':
         likes_playlist.update(token, args.dry, args.playlist_id, args.config_path, args.check_albums, args.by_name, args.by_name_part)
+    elif args.command == 'remove_duplicates':
+        remove_duplicates.run(token, args.dry, args.playlist_id)
 
 
 if __name__ == '__main__':
