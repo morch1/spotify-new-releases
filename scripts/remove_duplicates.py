@@ -19,8 +19,6 @@ def run(token, dry, playlist_id):
             shortname = name.split(' - ')[0].split(' (')[0].split(' [')[0]
             remix_re = re.search(REMIX_REGEX, name)
             rmxartist = remix_re.group(1) if remix_re else None
-            if name == 'neo-tokyo (dance with the dead remix) - instrumental':
-                print(remix_re)
             tracks.append((song['track']['id'], song['track']['artists'][0]['name'], name, shortname, rmxartist, song['added_at'], song['added_by']['id']))
         songs = sp.next(songs) if songs['next'] else None
 
