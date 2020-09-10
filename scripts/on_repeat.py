@@ -49,7 +49,7 @@ def run(token, dry, on_repeat_id, playlist_id, **_):
         except ValueError:
             time.sleep(1)
             if not dry:
-                sp.playlist_add_items(playlist_id, track, i)
+                sp.playlist_add_items(playlist_id, [track], i)
             playlisted_tracks.insert(i, track)
             n_added += 1
     bar.finish()
