@@ -34,4 +34,4 @@ def run(token, dry, lastfm_username, year, playlist_id, **_):
 
     if not dry:
         sp.playlist_replace_items(playlist_id, spotify_tracks)
-        sp.playlist_change_details(playlist_id, description=f'nutki słuchane {start.strftime("%A, %B %d, %Y")}')
+        sp.playlist_change_details(playlist_id, description=start.strftime("%A, %B %d, %Y"))
