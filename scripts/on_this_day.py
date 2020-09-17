@@ -3,36 +3,48 @@ import calendar
 import pylast
 import spotipy
 import time
+import progressbar
+import json
+from common import lastfm
 from datetime import datetime, timedelta, date
 
 
 def init(parser):
-    parser.add_argument('lastfm_username')
     parser.add_argument('year', type=int)
     parser.add_argument('playlist_id')
+    parser.add_argument('db_path')
 
 
-def run(token, dry, lastfm_username, year, playlist_id, **_):
-    lfm_network = pylast.LastFMNetwork(api_key=os.getenv('PYLAST_API_KEY'), api_secret=os.getenv('PYLAST_API_SECRET'))
-    lfm_user = lfm_network.get_user(lastfm_username)
+def run(token, dry, year, playlist_id, db_path, **_):
     sp = spotipy.Spotify(auth=token)
 
     today = date.today()
 
     start = datetime(year=year, month=today.month, day=(28 if today.month == 2 and today.day == 29 and not calendar.isleap(year) else today.day))
-    start_ts = calendar.timegm(start.utctimetuple())
+    start_ts = int(start.timestamp())
     end = start + timedelta(days=1)
-    end_ts = calendar.timegm(end.utctimetuple())
+    end_ts = int(end.timestamp())
 
-    lastfm_tracks = lfm_user.get_recent_tracks(time_from=start_ts, time_to=end_ts, limit=999)
+    print('loading tracks from scrobble db')
+
+    with open(db_path, 'r', encoding='utf-8') as dbf:
+        lastfm_tracks = lastfm.get_scrobbles(json.load(dbf), start_ts, end_ts)
+
+    print('finding tracks on spotify')
+
     spotify_tracks = []
-
-    for t in lastfm_tracks:
+    bar = progressbar.ProgressBar(maxval=len(lastfm_tracks))
+    bar.start()
+    for i, (_, artist, _, track) in enumerate(lastfm_tracks):
         time.sleep(0.1)
-        sr = sp.search(q=f'artist:{t.track.artist} track:{t.track.title}', type='track', limit=1, market='PL')
+        sr = sp.search(q=f'artist:{artist} track:{track}', type='track', limit=1, market='PL')
         if len(sr['tracks']['items']) > 0:
             spotify_tracks.append(sr['tracks']['items'][0]['id'])
+        bar.update(i)
+    bar.finish()
     spotify_tracks.reverse()
+
+    print('updating playlist')
 
     if not dry:
         sp.playlist_replace_items(playlist_id, spotify_tracks)
