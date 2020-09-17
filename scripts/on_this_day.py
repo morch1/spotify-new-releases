@@ -2,6 +2,7 @@ import os
 import calendar
 import pylast
 import spotipy
+import time
 from datetime import datetime, timedelta, date
 
 
@@ -27,6 +28,7 @@ def run(token, dry, lastfm_username, year, playlist_id, **_):
     spotify_tracks = []
 
     for t in lastfm_tracks:
+        time.sleep(0.1)
         sr = sp.search(q=f'artist:{t.track.artist} track:{t.track.title}', type='track', limit=1, market='PL')
         if len(sr['tracks']['items']) > 0:
             spotify_tracks.append(sr['tracks']['items'][0]['id'])
