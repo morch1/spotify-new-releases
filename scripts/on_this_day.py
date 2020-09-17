@@ -5,7 +5,7 @@ import spotipy
 import time
 import progressbar
 import json
-from common import lastfm
+from common import lastfm, spotify_bulk_search
 from datetime import datetime, timedelta, date
 
 
@@ -32,16 +32,7 @@ def run(token, dry, year, playlist_id, db_path, **_):
 
     print('finding tracks on spotify')
 
-    spotify_tracks = []
-    bar = progressbar.ProgressBar(maxval=len(lastfm_tracks))
-    bar.start()
-    for i, (_, artist, _, track) in enumerate(lastfm_tracks):
-        time.sleep(0.1)
-        sr = sp.search(q=f'artist:{artist} track:{track}', type='track', limit=1, market='PL')
-        if len(sr['tracks']['items']) > 0:
-            spotify_tracks.append(sr['tracks']['items'][0]['id'])
-        bar.update(i)
-    bar.finish()
+    spotify_tracks = spotify_bulk_search(sp, [(a, t) for (_, a, _, t) in lastfm_tracks], os.getenv('SPOTIFY_REGION'), None, True)
     spotify_tracks.reverse()
 
     print('updating playlist')
