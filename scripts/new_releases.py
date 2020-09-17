@@ -2,16 +2,16 @@ import spotipy
 import random
 import time
 import progressbar
+import os
 from datetime import datetime, timedelta
 
 
 def init(parser):
-    parser.add_argument('country')
     parser.add_argument('playlist_id')
     parser.add_argument('--num_tracks', type=int, default=30)
 
 
-def run(token, dry, country, playlist_id, num_tracks, **_):
+def run(token, dry, playlist_id, num_tracks, **_):
     sp = spotipy.Spotify(auth=token)
 
     print('getting followed artists...')
@@ -41,7 +41,7 @@ def run(token, dry, country, playlist_id, num_tracks, **_):
     new_albums = []
     for i, artist in enumerate(followed_artists):
         time.sleep(0.2)
-        albums = sp.artist_albums(artist, country=country, album_type='album,single')
+        albums = sp.artist_albums(artist, country=os.getenv('SPOTIFY_REGION'), album_type='album,single')
         while albums:
             for album in albums['items']:
                 if any(a[0] == album['id'] for a in new_albums):
