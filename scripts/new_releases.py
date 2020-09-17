@@ -44,6 +44,8 @@ def run(token, dry, country, playlist_id, num_tracks, **_):
         albums = sp.artist_albums(artist, country=country, album_type='album,single')
         while albums:
             for album in albums['items']:
+                if any(a[0] == album['id'] for a in new_albums):
+                    continue
                 formats = {
                     'day': '%Y-%m-%d',
                     'month': '%Y-%m',
