@@ -3,6 +3,7 @@ import json
 import collections
 import progressbar
 import time
+from common import lastfm
 from datetime import datetime
 
 
@@ -22,7 +23,7 @@ def run(token, dry, year, playlist_id, db_path, num_tracks, **_):
     print(f'loading top {num_tracks} tracks from scrobble db')
 
     with open(db_path, 'r', encoding='utf-8') as dbf:
-        lastfm_tracks = collections.Counter([(s[1], s[3]) for s in json.load(dbf) if year_start_ts <= int(s[0]) < year_end_ts]).most_common(int(num_tracks * 1.2))
+        lastfm_tracks = lastfm.get_top_songs(json.load(dbf), int(num_tracks * 1.2), year_start_ts, year_end_ts)
 
     print(f'finding tracks on spotify')
 
@@ -34,7 +35,7 @@ def run(token, dry, year, playlist_id, db_path, num_tracks, **_):
         sr = sp.search(q=f'artist:{artist} track:{track}', type='track', limit=1, market='PL')
         if len(sr['tracks']['items']) > 0:
             spotify_tracks.append(sr['tracks']['items'][0]['id'])
-            if len(spotify_tracks) == 100:
+            if len(spotify_tracks) == num_tracks:
                 break
         bar.update(len(spotify_tracks))
     bar.finish()
