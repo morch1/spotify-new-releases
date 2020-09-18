@@ -64,43 +64,25 @@ def run(token, dry, playlist_id, num_tracks, **_):
     bar.start()
     new_tracks = []
     for i, (album, release_date) in enumerate(new_albums):
-        time.sleep(0.2)
-        album_tracks = []
-        top_track_pop = 0
-        songs = sp.album_tracks(album)
-        while songs:
-            for song in songs['items']:
-                song = sp.track(song['id'])
-                top_track_pop = max(top_track_pop, song['popularity'])
-                album_tracks.append((song['id'], song['popularity']))
-            songs = sp.next(songs) if songs['next'] else None
-        new_tracks.append(random.choice([(t[0], album) for t in album_tracks if t[1] == top_track_pop]))
+        existing = [t[0] for t in playlisted_tracks if t[1] == album]
+        if len(existing) > 0:
+            new_tracks.append(existing[0])
+        else:
+            time.sleep(0.2)
+            album_tracks = []
+            top_track_pop = 0
+            songs = sp.album_tracks(album)
+            while songs:
+                for song in songs['items']:
+                    song = sp.track(song['id'])
+                    top_track_pop = max(top_track_pop, song['popularity'])
+                    album_tracks.append((song['id'], song['popularity']))
+                songs = sp.next(songs) if songs['next'] else None
+            new_tracks.append(random.choice([t[0] for t in album_tracks if t[1] == top_track_pop]))
         bar.update(i)
     bar.finish()
 
     print('updating playlist...')
 
-    new_albums = [a[0] for a in new_albums]
-    to_remove = [t[0] for t in playlisted_tracks if t[1] not in new_albums]
-
-    if not dry and len(to_remove) > 0:
-        sp.playlist_remove_all_occurrences_of_items(playlist_id, to_remove)
-
-    to_add = []
-    for i, (t, a) in enumerate(new_tracks):
-        if a not in playlisted_albums:
-            to_add.append((t, i if len(playlisted_albums) > 0 else 0))
-
-    if len(playlisted_albums) == 0:
-        to_add = list(reversed(to_add))
-
     if not dry:
-        bar = progressbar.ProgressBar(maxval=len(to_add))
-        bar.start()
-        for j, (t, i) in enumerate(to_add):
-            time.sleep(1)
-            sp.playlist_add_items(playlist_id, [t], position=i)
-            bar.update(j)
-        bar.finish()
-
-    print('added', len(to_add), 'removed', len(to_remove))
+        sp.playlist_replace_items(playlist_id, new_tracks)
