@@ -11,15 +11,14 @@ from datetime import datetime, timedelta
 def init(parser):
     parser.add_argument('playlist_id')
     parser.add_argument('db_path')
-    parser.add_argument('--days', default=365, type=int)
     parser.add_argument('--num_tracks', default=100, type=int)
+    parser.add_argument('--days', type=int)
 
 
-def run(token, dry, playlist_id, db_path, days, num_tracks, **_):
+def run(token, dry, playlist_id, db_path, num_tracks, days=None, **_):
     sp = spotipy.Spotify(auth=token)
 
-    start_ts = (datetime.now() - timedelta(days=days)).timestamp()
-
+    start_ts = (datetime.now() - timedelta(days=days)).timestamp() if days is not None else 0
 
     print(f'loading top {num_tracks} tracks from scrobble db')
 
