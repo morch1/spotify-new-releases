@@ -88,7 +88,7 @@ class Spotify:
                         'year': '%Y',
                     }
                     release_date = datetime.strptime(album['release_date'], formats[album['release_date_precision']])
-                    new_albums.append((album['id'], release_date))
+                    new_albums.append((album['id'], release_date, album['artists'][0]['name']))
                 albums = sp.next(albums) if albums['next'] else None
             bar.update(i)
         new_albums = list(reversed(sorted(new_albums, key=lambda a: a[1])))[:num_tracks]
@@ -98,7 +98,9 @@ class Spotify:
         bar = progressbar.ProgressBar(maxval=len(new_albums))
         bar.start()
         new_tracks = []
-        for i, (album, release_date) in enumerate(new_albums):
+        new_count = 0
+        new_artists = set()
+        for i, (album, release_date, artist_name) in enumerate(new_albums):
             existing = [t[0] for t in playlisted_tracks if t[1] == album]
             if len(existing) > 0:
                 new_tracks.append(existing[0])
@@ -114,12 +116,16 @@ class Spotify:
                         album_tracks.append((song['id'], song['popularity']))
                     songs = sp.next(songs) if songs['next'] else None
                 new_tracks.append(random.choice([t[0] for t in album_tracks if t[1] == top_track_pop]))
+                new_count += 1
+                new_artists.add(artist_name)
             bar.update(i)
         bar.finish()
 
         print('updating playlist...')
         if not self.dry:
             sp.playlist_replace_items(playlist_id, new_tracks)
+        self.join.notify(f'New release(s)', f'{new_count} new track(s) by {", ".join(new_artists)}', 'Spotify new releases',
+            self.playlist_url(playlist_id), self.join.ICON_SPOTIFY)
 
 
     def update_on_repeat(self, playlist_id, on_repeat_id):
