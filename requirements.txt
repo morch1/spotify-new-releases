@@ -1,4 +1,4 @@
 progressbar==2.5
 spotipy==2.14.0
-python-dotenv==0.14.0
 pylast==3.3.0
+hjson==3.0.2
