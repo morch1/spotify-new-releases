@@ -124,8 +124,9 @@ class Spotify:
         print('updating playlist...')
         if not self.dry:
             sp.playlist_replace_items(playlist_id, new_tracks)
-        self.join.notify(f'New release(s)', f'{new_count} new track(s) by {", ".join(new_artists)}', 'Spotify new releases',
-            self.playlist_url(playlist_id), self.join.ICON_SPOTIFY)
+        if new_count > 0:
+            self.join.notify(f'New release(s)', f'{new_count} new track(s) by {", ".join(new_artists)}', 'Spotify new releases',
+                self.playlist_url(playlist_id), self.join.ICON_SPOTIFY)
 
 
     def update_on_repeat(self, playlist_id, on_repeat_id):
