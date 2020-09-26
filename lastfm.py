@@ -7,6 +7,9 @@ from datetime import datetime, timedelta
 
 class LastFM:
     def __init__(self, db, api_key, api_secret, username, password_hash):
+        if api_key is None:
+            return
+            
         self.network = pylast.LastFMNetwork(api_key=api_key, api_secret=api_secret, username=username, password_hash=password_hash)
         self.user = self.network.get_user(username)
         self.scrobbles = db['scrobbles']

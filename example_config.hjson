@@ -1,0 +1,118 @@
+{
+    db_path: C:\path\to\db.json
+
+    spotify: {
+        client_id: ...
+        client_secret: ...
+        redirect_uri: http://localhost:8090
+        region: PL
+        username: ...
+    }
+
+    lastfm: {
+        # set all to null if you dont use last.fm (some commands won't work)
+        api_key: ...
+        api_secret: ...
+        username: ...
+        password_hash: ...
+    }
+
+    join: {
+        # set both fields to null to disable notifications
+        api_key: ...
+        # these devices will receive notifications:
+        device_ids: ["...", "..."]
+    }
+
+    tasks: [
+        {
+            # puts tracks from [num_tracks] most recent releases from artists you follow on the playlist,
+            # one track per release
+            cmd: update_new_releases
+            args: {
+                playlist_id: ...
+                num_tracks: 30
+            }
+        },
+        {
+            # updates the playlist with tracks from your On Repeat, retaining the order
+            cmd: update_on_repeat
+            args: {
+                playlist_id: ...
+                on_repeat_id: ...
+            }
+        },
+        {
+            # puts tracks you've liked on the playlist, except tracks that are on one of [other_playlists], and tracks
+            # that are in your saved albums if [check_albums] is set to true
+            cmd: update_likes_playlist
+            args: {
+                playlist_id: ...
+                other_playlists: ["...", "...", "..."]
+                check_albums: true
+                # tracks will be compared by part of their name, instead of full name (ie. if 2 tracks have the same artist
+                # and part of the name of either one appears in the name of the other one, then they are the same track)
+                by_name_part: true
+            }
+        },
+        {
+            # removes duplicate tracks from playlists (it's far from perfect, might remove stuff that isn't really a
+            # duplicate, so proceed with caution)
+            cmd: remove_duplicates
+            args: {
+                playlist_ids: ["..."]
+            }
+        },
+        {
+            # makes the playlist contain [num_tracks] tracks that you've listened the most in the specified time period
+            # (ending at [date_end], starting [num_days] earlier), according to lastfm.
+            # this example will update the playlist with your top 100 tracks of all time
+            cmd: update_top_playlist
+            args: {
+                playlist_id: ...
+                date_end: null  # unix timestamp, or null to use the current date
+                num_days: null  # null means no lower limit
+                num_tracks: 100
+            }
+        },
+        {
+            # top 100 tracks in the past 365 days
+            cmd: update_top_playlist
+            args: {
+                playlist_id: ...
+                date_end: null
+                num_days: 365
+                num_tracks: 100
+            }
+        },
+        {
+            # top 30 tracks of december 2019
+            cmd: update_top_playlist
+            args: {
+                playlist_id: ...
+                date_end: 1577836800
+                num_days: 30
+                num_tracks: 30
+            }
+        },
+        {
+            # updates playlists with tracks that you listened to on the current day in the past years (based on lastfm)
+            cmd: update_on_this_day
+            args: {
+                # year: playlist id
+                2019: ...
+                2018: ...
+                2017: ...
+                2016: ...
+                2015: ...
+            }
+        },
+        {
+            # sends a Join notification if tracks were added to any of the specified playlists
+            cmd: update_playlist_notifications
+            args: {
+                playlist_ids: ["...", "...", "..."]
+            }
+        }
+    ]
+}
