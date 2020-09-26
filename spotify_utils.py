@@ -4,10 +4,12 @@ import spotipy.util as util
 import scripts
 import hjson
 import json
+from commands import COMMANDS
 from pathlib import Path
 from spotify import Spotify
 from lastfm import LastFM
 from join import Join
+from config import Config
 
 SCOPE = 'playlist-read-private playlist-read-collaborative user-library-read playlist-modify-private playlist-modify-public user-follow-read'
 
@@ -39,10 +41,12 @@ def main():
 
     lastfm = LastFM(db['lastfm'], **config['lastfm'])
     join = Join(**config['join'])
-    spotify = Spotify(db['spotify'], args.dry, lastfm, join, **config['spotify'])
+    spotify = Spotify(db['spotify'], **config['spotify'])
+    configObj = Config(args.dry, spotify, lastfm, join)
 
     for task in config['tasks']:
-        getattr(spotify, task['cmd'])(**task['args'])
+        print('>>> ', task['cmd'], task['args'])
+        COMMANDS[task['cmd']](configObj, **task['args'])
 
     if not args.dry:
         with open(db_path, 'w', encoding='utf-8') as f:

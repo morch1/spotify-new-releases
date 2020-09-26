@@ -1,13 +1,13 @@
 import os
 import requests
 
+ICON_SPOTIFY = 'https%3A%2F%2Fwww.iconsdb.com%2Ficons%2Fdownload%2Fwhite%2Fspotify-64.png'
+
+GROUP_PLAYLIST_UPDATES = 'Spotify - playlist updates'
+GROUP_NEW_RELEASES = 'Spotify - new releases'
+
 
 class Join:
-    ICON_SPOTIFY = 'https%3A%2F%2Fwww.iconsdb.com%2Ficons%2Fdownload%2Fwhite%2Fspotify-64.png'
-
-    GROUP_PLAYLIST_UPDATES = 'Spotify - playlist updates'
-    GROUP_NEW_RELEASES = 'Spotify - new releases'
-
     def __init__(self, api_key, device_ids):
         self.api_key = api_key
         self.device_ids = device_ids
