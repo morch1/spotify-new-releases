@@ -19,7 +19,7 @@ class Spotify:
         self.sp = spotipy.Spotify(auth=token)
         self.username = username
         self.region = region
-        self.watched_playlists = db['watched_playlists']
+        self.db = db
 
 
     def bulk_search(self, queries, limit=None, show_progressbar=False):

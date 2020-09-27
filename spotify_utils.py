@@ -32,7 +32,8 @@ def main():
     else:
         db = {
             'spotify': {
-                'watched_playlists': {}
+                'last_notification_update': '0000-00-00T00:00:00Z',
+                'followed_artists': {},
             },
             'lastfm': {
                 'scrobbles': [],
