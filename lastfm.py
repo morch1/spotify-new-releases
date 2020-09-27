@@ -37,8 +37,19 @@ class LastFM:
 
 
     def get_scrobbles(self, ts_from=0, ts_to=sys.maxsize):
-        return [s for s in self.scrobbles if ts_from <= int(s[0]) < ts_to]
+        return sorted([s for s in self.scrobbles if ts_from <= int(s[0]) < ts_to], key=lambda s: s[0])
 
 
     def get_top_songs(self, n, ts_from=0, ts_to=sys.maxsize):
-        return collections.Counter([(s[1], s[3]) for s in self.get_scrobbles(ts_from, ts_to)]).most_common(n)
+        scrobbles = self.get_scrobbles(ts_from, ts_to)
+        song_counter = collections.Counter([(s[1], s[3]) for s in scrobbles])
+        song_max = song_counter.most_common(1)[0][1]
+        artist_counter = collections.Counter([s[1] for s in scrobbles])
+        artist_max = artist_counter.most_common(1)[0][1]
+        days_counter = collections.Counter(dict(((artist, song), len(set(datetime.fromtimestamp(int(s[0])).strftime('%Y%m%d') for s in scrobbles if (s[1], s[3]) == (artist, song)))) for (artist, song) in song_counter))
+        days_max = days_counter.most_common(1)[0][1]
+        scores = {}
+        for (artist, song), count in song_counter.items():
+            scores[(artist, song)] = int(((count / song_max) * 0.8 + (days_counter[(artist, song)] / days_max) * 0.15 + (artist_counter[artist] / artist_max) * 0.05) * 100000)
+        print(collections.Counter(scores).most_common(n))
+        return collections.Counter(scores).most_common(n)
