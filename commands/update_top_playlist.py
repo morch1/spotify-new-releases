@@ -1,6 +1,6 @@
 from datetime import datetime
 
-def run(config, playlist_id, date_end, num_days, num_tracks):
+def run(config, playlist_id, date_end=None, num_days=None, num_tracks=100):
     sp = config.spotify.sp
 
     ts_to = date_end if date_end is not None else int(datetime.now().timestamp())

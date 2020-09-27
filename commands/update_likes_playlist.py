@@ -1,4 +1,4 @@
-def run(config, playlist_id, check_albums, by_name_part, other_playlists):
+def run(config, playlist_id, other_playlists, check_albums=False, by_name_part=False):
     sp = config.spotify.sp
 
     playlisted_tracks = {}

@@ -5,7 +5,7 @@ import join
 from datetime import datetime
 
 
-def run(config, playlist_id, num_tracks):
+def run(config, playlist_id, num_tracks=30):
     sp = config.spotify.sp
 
     print('getting followed artists...')
