@@ -2,47 +2,56 @@ import progressbar
 import time
 import random
 import join
-from datetime import datetime
+from datetime import datetime, timedelta
+
+_DATE_FORMATS = {
+    'day': '%Y-%m-%d',
+    'month': '%Y-%m',
+    'year': '%Y',
+}
 
 
-def run(config, playlist_id, num_tracks=30):
+def run(config, playlist_id, num_tracks=30, newly_followed_buffer=7):
     sp = config.spotify.sp
+    db = config.spotify.db['followed_artists']
 
     print('getting followed artists...')
     followed_artists = []
     artists = sp.current_user_followed_artists()['artists']
     while artists:
         for artist in artists['items']:
+            if artist['id'] not in db.keys():
+                db[artist['id']] = (datetime.now() - timedelta(days=newly_followed_buffer)).strftime('%Y-%m-%d')
             followed_artists.append(artist['id'])
         artists = sp.next(artists)['artists'] if artists['next'] else None
 
+    for artist in list(db.keys()):
+        if artist not in followed_artists:
+            del db[artist]
+
     print('getting playlisted tracks...')
-    playlisted_albums = set()
+    new_albums = []
     playlisted_tracks = []
     songs = sp.playlist(playlist_id)['tracks']
     while songs:
         for song in songs['items']:
-            playlisted_albums.add(song['track']['album']['id'])
+            album = song['track']['album']
+            release_date = datetime.strptime(album['release_date'], _DATE_FORMATS[album['release_date_precision']])
+            new_albums.append((album['id'], release_date, album['artists'][0]['name']))
             playlisted_tracks.append((song['track']['id'], song['track']['album']['id']))
         songs = sp.next(songs) if songs['next'] else None
 
     print('getting new albums...')
     bar = progressbar.ProgressBar(maxval=len(followed_artists))
     bar.start()
-    new_albums = []
     for i, artist in enumerate(followed_artists):
         time.sleep(0.2)
         albums = sp.artist_albums(artist, country=config.spotify.region, album_type='album,single')
         while albums:
             for album in albums['items']:
-                if any(a[0] == album['id'] for a in new_albums):
+                if any(a[0] == album['id'] for a in new_albums) or album['release_date'] < db[artist]:
                     continue
-                formats = {
-                    'day': '%Y-%m-%d',
-                    'month': '%Y-%m',
-                    'year': '%Y',
-                }
-                release_date = datetime.strptime(album['release_date'], formats[album['release_date_precision']])
+                release_date = datetime.strptime(album['release_date'], _DATE_FORMATS[album['release_date_precision']])
                 new_albums.append((album['id'], release_date, album['artists'][0]['name']))
             albums = sp.next(albums) if albums['next'] else None
         bar.update(i)
@@ -80,5 +89,5 @@ def run(config, playlist_id, num_tracks=30):
     if not config.dry:
         sp.playlist_replace_items(playlist_id, new_tracks)
     if new_count > 0:
-        config.join.notify(f'New release(s)', f'{new_count} new track(s) by {", ".join(new_artists)}', join.GROUP_NEW_RELEASES,
+        config.join.notify(f'New release(s)', f'{new_count} new release(s) by {", ".join(new_artists)}', join.GROUP_NEW_RELEASES,
             config.spotify.playlist_url(playlist_id), join.ICON_SPOTIFY)
