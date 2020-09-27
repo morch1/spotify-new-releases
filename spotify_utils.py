@@ -1,7 +1,6 @@
 import argparse
 import spotipy
 import spotipy.util as util
-import scripts
 import hjson
 import json
 from commands import COMMANDS
