@@ -51,5 +51,4 @@ class LastFM:
         scores = {}
         for (artist, song), count in song_counter.items():
             scores[(artist, song)] = int(((count / song_max) * 0.8 + (days_counter[(artist, song)] / days_max) * 0.15 + (artist_counter[artist] / artist_max) * 0.05) * 100000)
-        print(collections.Counter(scores).most_common(n))
         return collections.Counter(scores).most_common(n)
