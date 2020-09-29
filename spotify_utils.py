@@ -22,7 +22,7 @@ def main():
     with open(args.config_file, 'r', encoding='utf-8') as cf:
         config = hjson.load(cf)
 
-    db_path = Path(config['db_path'])
+    db_path = Path(config['db']['path'])
     if db_path.exists():
         if not db_path.is_file():
             raise FileExistsError('invalid db path')
@@ -39,8 +39,8 @@ def main():
             },
         }
 
-    lastfm = LastFM(db['lastfm'], **config['lastfm'])
-    join = Join(**config['join'])
+    lastfm = LastFM(db['lastfm'], **config.get('lastfm', {}))
+    join = Join(**config.get('join', {}))
     spotify = Spotify(db['spotify'], **config['spotify'])
     configObj = Config(args.dry, spotify, lastfm, join)
 
@@ -48,7 +48,7 @@ def main():
         print('>>> ', task['cmd'], task['args'])
         COMMANDS[task['cmd']](configObj, **task['args'])
 
-    if not args.dry:
+    if not args.dry and not config['db'].get('readonly', False):
         with open(db_path, 'w', encoding='utf-8') as f:
             json.dump(db, f)
 

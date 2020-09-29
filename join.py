@@ -8,7 +8,7 @@ GROUP_NEW_RELEASES = 'Spotify - new releases'
 
 
 class Join:
-    def __init__(self, api_key, device_ids):
+    def __init__(self, api_key=None, device_ids=None):
         self.api_key = api_key
         self.device_ids = device_ids
 
