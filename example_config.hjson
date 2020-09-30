@@ -35,11 +35,13 @@
             }
         },
         {
-            # updates the playlist with tracks from your On Repeat, retaining the order
-            cmd: update_on_repeat
+            # updates the playlist with tracks from another playlist, retaining the order
+            cmd: update_playlist
             args: {
                 playlist_id: ...
-                on_repeat_id: ...
+                src_playlist_id: ...
+                # only copy tracks that you've saved to your library?
+                liked_only: false
             }
         },
         {
