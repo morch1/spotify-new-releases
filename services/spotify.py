@@ -25,11 +25,16 @@ class Spotify:
         if show_progressbar:
             bar = progressbar.ProgressBar(maxval=limit if limit is not None else len(queries))
             bar.start()
-        for (artist, track) in queries:
+        for (artist, album, track) in queries:
             time.sleep(0.1)
-            sr = self.sp.search(q=f'artist:{artist} track:{track}', type='track', limit=1, market=self.region)
-            if len(sr['tracks']['items']) > 0:
-                spotify_tracks.append(sr['tracks']['items'][0]['id'])
+            sr = self.sp.search(q=f'artist:{artist} {album if album is not None else ""} track:{track}', type='track', limit=10, market=self.region)
+            if len(sr['tracks']['items']) == 0 and album is not None:
+                sr = self.sp.search(q=f'artist:{artist} track:{track}', type='track', limit=10, market=self.region)
+            sr2 = [s for s in sr['tracks']['items'] if s['name'] == track]
+            if len(sr2) == 0:
+                sr2 = sr['tracks']['items']
+            if len(sr2) > 0:
+                spotify_tracks.append(sr2[0]['id'])
                 if limit is not None and len(spotify_tracks) == limit:
                     break
             if show_progressbar:

@@ -19,7 +19,7 @@ def run(config, **playlist_ids):
         lastfm_tracks = config.lastfm.get_scrobbles(start_ts, end_ts)
 
         print('finding tracks on spotify')
-        spotify_tracks = config.spotify.bulk_search([(a, t) for (_, a, _, t) in lastfm_tracks], None, True)
+        spotify_tracks = config.spotify.bulk_search([(artist, album, track) for (_, artist, album, track) in lastfm_tracks], None, True)
         spotify_tracks.reverse()
 
         print('updating playlist')

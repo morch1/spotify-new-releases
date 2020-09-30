@@ -10,7 +10,7 @@ def run(config, playlist_id, date_end=None, num_days=None, num_tracks=100):
     lastfm_tracks = config.lastfm.get_top_songs(int(num_tracks * 1.2), ts_from, ts_to)
 
     print(f'finding tracks on spotify')
-    spotify_tracks = config.spotify.bulk_search([(a, t) for (a, t), _ in lastfm_tracks], num_tracks, True)
+    spotify_tracks = config.spotify.bulk_search([(artist, None, track) for (artist, track), _ in lastfm_tracks], num_tracks, True)
 
     print('updating playlist')
     if not config.dry:
