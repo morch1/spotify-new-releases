@@ -1,4 +1,4 @@
-from services import join
+from services import Join
 from datetime import datetime
 
 
@@ -21,7 +21,7 @@ def run(config, playlist_ids):
             songs = sp.next(songs) if songs['next'] else None
         if new_songs > 0:
             added_by = [sp.user(uid)['display_name'] for uid in added_by]
-            config.join.notify(playlist["name"], f'{new_songs} track(s) added by {", ".join(added_by)}', join.GROUP_PLAYLIST_UPDATES,
-                config.spotify.playlist_url(playlist_id), join.ICON_SPOTIFY)
+            config.join.notify(playlist["name"], f'{new_songs} track(s) added by {", ".join(added_by)}', Join.GROUP_PLAYLIST_UPDATES,
+                config.spotify.playlist_url(playlist_id), Join.ICON_SPOTIFY)
 
     db['last_notification_update'] = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
