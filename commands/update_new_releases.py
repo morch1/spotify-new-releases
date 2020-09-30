@@ -1,7 +1,7 @@
 import progressbar
 import time
 import random
-import join
+from services import Join
 from datetime import datetime, timedelta
 
 _DATE_FORMATS = {
@@ -89,5 +89,5 @@ def run(config, playlist_id, num_tracks=30, newly_followed_buffer=7):
     if not config.dry:
         sp.playlist_replace_items(playlist_id, new_tracks)
     if new_count > 0:
-        config.join.notify(f'New release(s)', f'{new_count} new release(s) by {", ".join(new_artists)}', join.GROUP_NEW_RELEASES,
-            config.spotify.playlist_url(playlist_id), join.ICON_SPOTIFY)
+        config.join.notify(f'New release(s)', f'{new_count} new release(s) by {", ".join(new_artists)}', Join.GROUP_NEW_RELEASES,
+            config.spotify.playlist_url(playlist_id), Join.ICON_SPOTIFY)

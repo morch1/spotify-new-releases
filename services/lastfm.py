@@ -1,6 +1,5 @@
 import sys
 import collections
-import spotify
 import pylast
 from datetime import datetime, timedelta
 

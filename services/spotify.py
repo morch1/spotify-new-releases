@@ -6,8 +6,6 @@ import random
 import calendar
 import re
 import itertools
-from join import Join
-from lastfm import LastFM
 from datetime import datetime, timedelta, date
 
 AUTH_SCOPE = 'playlist-read-private playlist-read-collaborative user-library-read playlist-modify-private playlist-modify-public user-follow-read'
