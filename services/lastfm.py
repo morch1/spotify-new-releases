@@ -40,8 +40,9 @@ class LastFM:
         return sorted([s for s in self.scrobbles if ts_from <= int(s[0]) < ts_to], key=lambda s: s[0])
 
 
-    def get_top_songs(self, n, ts_from=0, ts_to=sys.maxsize):
-        scrobbles = self.get_scrobbles(ts_from, ts_to)
+    def get_top_songs(self, n, ts_from=0, ts_to=sys.maxsize, scrobbles=None):
+        if scrobbles is None:
+            scrobbles = self.get_scrobbles(ts_from, ts_to)
         song_counter = collections.Counter([(s[1], s[3]) for s in scrobbles])
         song_max = song_counter.most_common(1)[0][1]
         artist_counter = collections.Counter([s[1] for s in scrobbles])
