@@ -1,6 +1,4 @@
 import argparse
-import spotipy
-import spotipy.util as util
 import hjson
 import json
 import services
