@@ -2,6 +2,7 @@ import argparse
 import hjson
 import json
 import services
+import sqlite3
 from commands import COMMANDS
 from pathlib import Path
 from config import Config
@@ -19,25 +20,13 @@ def main():
         config = hjson.load(cf)
 
     db_path = Path(config['db']['path'])
-    if db_path.exists():
-        if not db_path.is_file():
-            raise FileExistsError('invalid db path')
-        with open(db_path, 'r', encoding='utf-8') as dbf:
-            db = json.load(dbf)
-    else:
-        db = {
-            'spotify': {
-                'last_notification_update': '0000-00-00T00:00:00Z',
-                'followed_artists': {},
-            },
-            'lastfm': {
-                'scrobbles': [],
-            },
-        }
+    db = sqlite3.connect(db_path)
+    c = db.cursor()
+    c.execute(f'CREATE TABLE IF NOT EXISTS {Config.TABLE_KV} (k TEXT, v TEXT, PRIMARY KEY(k))')
 
-    lastfm = services.LastFM(db['lastfm'], **config.get('lastfm', {}))
+    lastfm = services.LastFM(db, **config.get('lastfm', {}))
     join = services.Join(**config.get('join', {}))
-    spotify = services.Spotify(db['spotify'], **config['spotify'])
+    spotify = services.Spotify(db, **config['spotify'])
     configObj = Config(args.dry, spotify, lastfm, join)
 
     for task in config['tasks']:
@@ -45,9 +34,8 @@ def main():
         COMMANDS[task['cmd']](configObj, **task['args'])
 
     if not args.dry and not config['db'].get('readonly', False):
-        with open(db_path, 'w', encoding='utf-8') as f:
-            json.dump(db, f)
-
+        db.commit()
+    db.close()
 
 if __name__ == '__main__':
     main()
