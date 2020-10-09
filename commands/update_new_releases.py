@@ -92,7 +92,7 @@ def run(config, playlist_id, num_tracks=50, newly_followed_buffer=7, include_pas
                     songs = sp.next(songs) if songs['next'] else None
             albums = sp.next(albums) if albums['next'] else None
         bar.update(i)
-    potential_tracks = list(set((a, rd, t) for (artist, _), (a, rd, t) in potential_tracks.items() if rd >= db[artist] or include_past_releases))
+    potential_tracks = list(set((a, rd, t) for (artist, _), (a, rd, t) in potential_tracks.items() if rd >= db.get(artist, '0') or include_past_releases))
     new_albums_set = set((album, release_date) for (album, release_date, _) in potential_tracks)
     new_albums = list(reversed(sorted([(album, release_date, [t for (a, rd, t) in potential_tracks if (a, rd) == (album, release_date)]) for (album, release_date) in new_albums_set], key=lambda a: a[1])))[:num_tracks]
     bar.finish()
