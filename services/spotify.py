@@ -7,14 +7,14 @@ import calendar
 import re
 import itertools
 from datetime import datetime, timedelta, date
+from spotipy.oauth2 import SpotifyOAuth
 
 AUTH_SCOPE = 'playlist-read-private playlist-read-collaborative user-library-read playlist-modify-private playlist-modify-public user-follow-read'
 
 
 class Spotify:
     def __init__(self, db, client_id, client_secret, redirect_uri, region, username):
-        token = util.prompt_for_user_token(username, AUTH_SCOPE, client_id, client_secret, redirect_uri)
-        self.sp = spotipy.Spotify(auth=token)
+        self.sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id, client_secret, redirect_uri, scope=AUTH_SCOPE, username=username))
         self.username = username
         self.region = region
         self.db = db
