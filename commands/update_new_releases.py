@@ -13,7 +13,7 @@ def normalize_track_name(name):
     return name.lower().replace('&', 'and').strip()
 
 
-def run(config, playlist_id, num_tracks=50, num_days=30):
+def run(config, playlist_id, num_days=30):
     sp = config.spotify.sp
     db = config.spotify.db
     now = datetime.utcnow().strftime('%Y-%m-%d')
