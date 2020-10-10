@@ -24,6 +24,5 @@ def run(config, playlist_id, since, num_tracks=100):
     spotify_tracks = config.spotify.bulk_search([(artist, None, track) for (artist, track), _ in lastfm_tracks], num_tracks, True)
 
     print('updating playlist')
-    if not config.dry:
-        sp.playlist_replace_items(playlist_id, spotify_tracks)
+    sp.playlist_replace_items(playlist_id, spotify_tracks)
     print(f'added {len(spotify_tracks)}')

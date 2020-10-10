@@ -44,11 +44,10 @@ def run(config, playlist_id, other_playlists, check_albums=False, by_name_part=F
         songs = sp.next(songs) if songs['next'] else None
 
     print('updating playlist...')
-    if not config.dry:
-        if len(to_add) > 0:
-            for i in range(0, len(to_add) // 100 + 1):
-                sp.playlist_add_items(playlist_id, to_add[i * 100 : (i + 1) * 100])
-        if len(to_remove) > 0:
-            for i in range(0, len(to_remove) // 100 + 1):
-                sp.playlist_remove_all_occurrences_of_items(playlist_id, to_remove[i * 100 : (i + 1) * 100])
+    if len(to_add) > 0:
+        for i in range(0, len(to_add) // 100 + 1):
+            sp.playlist_add_items(playlist_id, to_add[i * 100 : (i + 1) * 100])
+    if len(to_remove) > 0:
+        for i in range(0, len(to_remove) // 100 + 1):
+            sp.playlist_remove_all_occurrences_of_items(playlist_id, to_remove[i * 100 : (i + 1) * 100])
     print('added', len(to_add), 'removed', len(to_remove))

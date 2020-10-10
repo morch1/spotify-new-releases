@@ -23,7 +23,6 @@ def run(config, **playlist_ids):
         spotify_tracks.reverse()
 
         print('updating playlist')
-        if not config.dry:
-            sp.playlist_replace_items(playlist_id, spotify_tracks)
-            sp.playlist_change_details(playlist_id, description=start.strftime("%A, %B %d, %Y"))
+        sp.playlist_replace_items(playlist_id, spotify_tracks)
+        sp.playlist_change_details(playlist_id, description=start.strftime("%A, %B %d, %Y"))
         print(f'added {len(spotify_tracks)}')

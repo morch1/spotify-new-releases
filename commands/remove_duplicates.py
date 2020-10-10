@@ -31,7 +31,7 @@ def run(config, playlist_ids):
                 print()
 
         print('updating playlist...')
-        if not config.dry and len(duplicates) > 0:
+        if len(duplicates) > 0:
             for i in range(0, len(duplicates) // 100 + 1):
                 sp.playlist_remove_specific_occurrences_of_items(playlist_id, duplicates[i * 100 : (i + 1) * 100])
         print('removed', len(duplicates))

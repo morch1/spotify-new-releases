@@ -12,8 +12,6 @@ from spotipy.oauth2 import SpotifyOAuth
 
 class Spotify:
     AUTH_SCOPE = 'playlist-read-private playlist-read-collaborative user-library-read playlist-modify-private playlist-modify-public user-follow-read'
-    TABLE_FOLLOWED_ARTISTS = 'spotify_followed_artists'
-    TABLE_NEW_RELEASES = 'spotify_new_releases'
 
     def __init__(self, db, client_id, client_secret, redirect_uri, region, username):
         self.sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id, client_secret, redirect_uri, scope=self.AUTH_SCOPE, username=username))

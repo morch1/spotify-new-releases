@@ -1,8 +1,7 @@
 class Config:
     TABLE_KV = 'kv'
 
-    def __init__(self, dry, db, spotify, lastfm, join):
-        self.dry = dry
+    def __init__(self, db, spotify, lastfm, join):
         self.db = db
         self.spotify = spotify
         self.lastfm = lastfm
