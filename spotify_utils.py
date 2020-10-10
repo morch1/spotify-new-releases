@@ -21,13 +21,11 @@ def main():
 
     db_path = Path(config['db']['path'])
     db = sqlite3.connect(db_path)
-    c = db.cursor()
-    c.execute(f'CREATE TABLE IF NOT EXISTS {Config.TABLE_KV} (k TEXT, v TEXT, PRIMARY KEY(k))')
 
     lastfm = services.LastFM(db, **config.get('lastfm', {}))
     join = services.Join(**config.get('join', {}))
     spotify = services.Spotify(db, **config['spotify'])
-    configObj = Config(args.dry, spotify, lastfm, join)
+    configObj = Config(args.dry, db, spotify, lastfm, join)
 
     for task in config['tasks']:
         print('>>> ', task['cmd'], task['args'])

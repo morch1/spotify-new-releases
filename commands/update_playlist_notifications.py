@@ -6,12 +6,9 @@ from datetime import datetime
 def run(config, playlist_ids):
     sp = config.spotify.sp
     username = config.spotify.username
-    db = config.spotify.db
     now = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
 
-    c = db.cursor()
-    c.execute(f'SELECT v FROM {config.TABLE_KV} WHERE k = ?', ('last_notification_update',))
-    last_notification_update = (c.fetchone() or (now,))[0]
+    last_notification_update = config.get_kv('last_notification_update', now)
 
     for playlist_id in playlist_ids:
         print(f'checking playlist {playlist_id}')
@@ -30,4 +27,4 @@ def run(config, playlist_ids):
             config.join.notify(playlist["name"], f'{new_songs} track(s) added by {", ".join(added_by)}', Join.GROUP_PLAYLIST_UPDATES,
                 config.spotify.playlist_url(playlist_id), Join.ICON_SPOTIFY)
 
-    c.execute(f'REPLACE INTO {config.TABLE_KV} (k, v) values (?, ?)', ('last_notification_update', now))
+    config.set_kv('last_notification_update', now)

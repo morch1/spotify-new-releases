@@ -24,8 +24,7 @@ def run(config, playlist_id, num_days=30):
     c = db.cursor()
     c.execute(f'CREATE TABLE IF NOT EXISTS {tbl_artists} (id TEXT, name TEXT, PRIMARY KEY(id))')
     c.execute(f'CREATE TABLE IF NOT EXISTS {tbl_releases} (id INTEGER PRIMARY KEY AUTOINCREMENT, artist TEXT, track TEXT, album TEXT, release_date TEXT, track_name TEXT, playlisted INTEGER)')
-    c.execute(f'SELECT v FROM {config.TABLE_KV} WHERE k = ?', ('last_releases_update',))
-    last_releases_update = (c.fetchone() or (now,))[0]
+    last_releases_update = config.get_kv('last_releases_update', now)
     cutoff_date = (datetime.strptime(last_releases_update, '%Y-%m-%d') - timedelta(days=num_days)).strftime('%Y-%m-%d')
 
     print('getting followed artists...')
