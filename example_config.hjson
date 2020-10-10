@@ -1,5 +1,5 @@
 {
-    db_path: C:\path\to\db.json
+    db_path: C:\path\to\database.db
 
     spotify: {
         client_id: ...
