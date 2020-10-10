@@ -5,14 +5,14 @@ import sqlite3
 import time
 from datetime import datetime, timedelta
 
+_TABLE_SCROBBLES = 'lastfm_scrobbles'
+
 
 class LastFM:
-    TABLE_SCROBBLES = 'lastfm_scrobbles'
-
     def __init__(self, db, api_key=None, api_secret=None, username=None, password_hash=None, update_scrobbles=True):
         self.db = db
         c = db.cursor()
-        c.execute(f'''CREATE TABLE IF NOT EXISTS {self.TABLE_SCROBBLES} (
+        c.execute(f'''CREATE TABLE IF NOT EXISTS {_TABLE_SCROBBLES} (
                 id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp INTEGER, artist_name TEXT, album_name TEXT, song_name TEXT,
                 UNIQUE(timestamp, artist_name, album_name, song_name)
             )''')
@@ -25,7 +25,7 @@ class LastFM:
 
         print('updating scrobbles...')
 
-        c.execute(f'SELECT COUNT(id), MAX(timestamp) FROM {self.TABLE_SCROBBLES}')
+        c.execute(f'SELECT COUNT(id), MAX(timestamp) FROM {_TABLE_SCROBBLES}')
         scrob_count, last_timestamp = c.fetchone()
 
         time_from = 0 if scrob_count == 0 else last_timestamp
@@ -40,12 +40,12 @@ class LastFM:
                 scrobble = (int(s.timestamp), s.track.artist.name, s.album, s.track.title)
                 new_scrobbles.append(scrobble)
             time_to = s.timestamp
-            print(len(new_scrobbles))
+            # print(len(new_scrobbles))
 
         n_new = 0
         for s in reversed(new_scrobbles):
             try:
-                c.execute(f'INSERT INTO {self.TABLE_SCROBBLES} (timestamp, artist_name, album_name, song_name) VALUES (?, ?, ?, ?)', s)
+                c.execute(f'INSERT INTO {_TABLE_SCROBBLES} (timestamp, artist_name, album_name, song_name) VALUES (?, ?, ?, ?)', s)
                 n_new += 1
             except sqlite3.IntegrityError:
                 pass
@@ -56,7 +56,7 @@ class LastFM:
 
     def get_scrobbles(self, ts_from=0, ts_to=sys.maxsize):
         c = self.db.cursor()
-        c.execute(f'SELECT timestamp, artist_name, album_name, song_name FROM {self.TABLE_SCROBBLES} WHERE timestamp >= ? AND timestamp < ? ORDER BY timestamp ASC', (ts_from, ts_to))
+        c.execute(f'SELECT timestamp, artist_name, album_name, song_name FROM {_TABLE_SCROBBLES} WHERE timestamp >= ? AND timestamp < ? ORDER BY timestamp ASC', (ts_from, ts_to))
         return c.fetchall()
 
 

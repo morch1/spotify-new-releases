@@ -8,17 +8,10 @@ _TABLE_FOLLOWED_ARTISTS = 'spotify_followed_artists'
 _TABLE_NEW_RELEASES = 'spotify_new_releases'
 
 
-def shorten_track_name(name):
-    return name.split(' - ')[0].split(' (')[0].split(' [')[0]
-
-
-def normalize_track_name(name):
-    return name.lower().replace('&', 'and').strip()
-
-
 def run(config, playlist_id, num_days=30):
-    sp = config.spotify.sp
-    db = config.spotify.db
+    spotify = config.spotify
+    sp = spotify.sp
+    db = spotify.db
     now = datetime.utcnow().strftime('%Y-%m-%d')
 
     c = db.cursor()
@@ -62,7 +55,7 @@ def run(config, playlist_id, num_days=30):
                     for track in songs['items']:
                         if artist not in [a['id'] for a in track['artists']]:
                             continue
-                        track_name = normalize_track_name(track['name'])
+                        track_name = spotify.normalize_track_name(track['name'])
                         c.execute(f'SELECT release_date FROM {_TABLE_NEW_RELEASES} WHERE artist = ? AND track_name = ?', (artist, track_name))
                         db_release_date = (c.fetchone() or (None,))[0]
                         if db_release_date is None or release_date < db_release_date:
@@ -82,8 +75,8 @@ def run(config, playlist_id, num_days=30):
                     for track in songs['items']:
                         if artist not in [a['id'] for a in track['artists']]:
                             continue
-                        track_name = normalize_track_name(track['name'])
-                        short_name = shorten_track_name(track_name)
+                        track_name = spotify.normalize_track_name(track['name'])
+                        short_name = spotify.shorten_track_name(track_name)
                         c.execute(f'SELECT id FROM {_TABLE_NEW_RELEASES} WHERE artist = ? AND track_name LIKE ?', (artist, short_name + '%'))
                         exists = c.fetchone() is not None
                         if not exists:
@@ -125,3 +118,5 @@ def run(config, playlist_id, num_days=30):
             sp.playlist_add_items(playlist_id, new_tracks[i * 100 : (i + 1) * 100], 0)
         config.join.notify(f'New release(s)', f'{len(new_tracks)} new release(s) by {", ".join(new_artists)}', Join.GROUP_NEW_RELEASES,
             config.spotify.playlist_url(playlist_id), Join.ICON_SPOTIFY)
+    
+    config.set_kv('last_releases_update', now)

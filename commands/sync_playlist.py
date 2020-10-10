@@ -2,14 +2,15 @@ import progressbar
 import time
 
 _SYNC_MODES = ['update', 'update_retain_order', 'mirror']
-_TABLE_SYNCED_PLAYLISTS = 'synced_playlists'
+_TABLE_SYNCED_PLAYLISTS = 'spotify_synced_playlists'
 
 
 def run(config, dst_playlist_id, src_playlist_id, sync_mode, liked_only=False, readd_removed=False):
     if sync_mode not in _SYNC_MODES:
         raise ValueError('invalid sync mode')
 
-    sp = config.spotify.sp
+    spotify = config.spotify
+    sp = spotify.sp
     db = config.db
 
     c = db.cursor()
@@ -34,21 +35,12 @@ def run(config, dst_playlist_id, src_playlist_id, sync_mode, liked_only=False, r
             db_dst_tracks[track] = 1
             c.execute(f'UPDATE {_TABLE_SYNCED_PLAYLISTS} SET removed = ? WHERE dst_playlist_id = ? AND track_id = ?', (1, dst_playlist_id, track))
 
-    if liked_only:
-        print('getting saved tracks...')
-        liked_tracks = set()
-        songs = sp.current_user_saved_tracks()
-        while songs:
-            for song in songs['items']:
-                liked_tracks.add((song['track']['artists'][0]['id'], song['track']['name']))
-            songs = sp.next(songs) if songs['next'] else None
-
     print('checking source playlist...')
     src_tracks = []
     songs = sp.playlist(src_playlist_id)['tracks']
     while songs:
         for song in songs['items']:
-            if (not liked_only or (song['track']['artists'][0]['id'], song['track']['name']) in liked_tracks) and (readd_removed or not db_dst_tracks.get(song['track']['id'], 0)):
+            if (not liked_only or spotify.is_song_liked(song['track']['artists'][0]['id'], song['track']['name'])) and (readd_removed or not db_dst_tracks.get(song['track']['id'], 0)):
                 src_tracks.append(song['track']['id'])
         songs = sp.next(songs) if songs['next'] else None
 

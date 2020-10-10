@@ -1,5 +1,6 @@
 def run(config, playlist_id, other_playlists, check_albums=False, by_name_part=False):
-    sp = config.spotify.sp
+    spotify = config.spotify
+    sp = spotify.sp
 
     playlisted_tracks = {}
 
@@ -23,15 +24,12 @@ def run(config, playlist_id, other_playlists, check_albums=False, by_name_part=F
 
     print('getting saved tracks and comparing...')
     to_add = []
-    songs = sp.current_user_saved_tracks()
-    while songs:
-        for song in songs['items']:
-            on_both = song['track']['id'] in playlisted_tracks \
-                or any(s1[0] == song['track']['artists'][0]['id'] and s1[1] == song['track']['name'].lower() for _, s1 in playlisted_tracks.items()) \
-                or (by_name_part and any(s1[0] == song['track']['artists'][0]['id'] and (s1[1] in song['track']['name'].lower() or song['track']['name'].lower() in s1[1]) for _, s1 in playlisted_tracks.items()))
-            if not on_both:
-                to_add.append(song['track']['id'])
-        songs = sp.next(songs) if songs['next'] else None
+    for track_id, artist, track_name in spotify.get_likes():
+        track_name = spotify.normalize_track_name(track_name)
+        short_name = spotify.shorten_track_name(track_name)
+        if not track_id in playlisted_tracks and not any(s1[0] == artist and s1[1] == track_name for _, s1 in playlisted_tracks.items()) \
+            and not (by_name_part and any(s1[0] == artist and (s1[1] in short_name or short_name in s1[1]) for _, s1 in playlisted_tracks.items())):
+            to_add.append(track_id)
 
     to_remove = []
     songs = sp.playlist(playlist_id)['tracks']

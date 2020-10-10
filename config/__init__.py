@@ -15,5 +15,5 @@ class Config:
     
     def get_kv(self, k, default=None):
         c = self.db.cursor()
-        c.execute(f'SELECT v FROM {self.TABLE_KV} WHERE k = ?', ('last_notification_update',))
+        c.execute(f'SELECT v FROM {self.TABLE_KV} WHERE k = ?', (k,))
         return (c.fetchone() or (default,))[0]

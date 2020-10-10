@@ -27,7 +27,7 @@ def main():
     configObj = Config(db, spotify, lastfm, join)
 
     for task in config['tasks']:
-        print('>>> ', task['cmd'], task['args'])
+        print('>>> ', task['cmd'], ' '.join(f'{arg}={value}' for arg, value in task['args'].items()))
         COMMANDS[task['cmd']](configObj, **task['args'])
 
     if not config['db'].get('readonly', False):
