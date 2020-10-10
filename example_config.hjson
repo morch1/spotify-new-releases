@@ -7,6 +7,8 @@
         redirect_uri: http://localhost:8090
         region: PL
         username: ...
+        # update likes stored in database before running commands?
+        update_likes: true
     }
 
     lastfm: {
@@ -15,6 +17,8 @@
         api_secret: ...
         username: ...
         password_hash: ...
+        # update scrobbles stored in database before running commands?
+        update_scrobbles: true
     }
 
     join: {
@@ -26,31 +30,38 @@
 
     tasks: [
         {
-            # puts tracks from [num_tracks] most recent releases from artists you follow on the playlist,
-            # one track per release
+            # add recent releases from artists you follow to a playlist, one track per release
             cmd: update_new_releases
             args: {
                 playlist_id: ...
-                num_tracks: 30
+                # only releases no older than this many days old will be detected
+                num_days: 30
             }
         },
         {
-            # updates the playlist with tracks from another playlist, retaining the order
-            cmd: update_playlist
+            # sync one playlist with another
+            cmd: sync_playlist
             args: {
-                playlist_id: ...
+                # destination playlist
+                dst_playlist_id: ...
+                # source playlist
                 src_playlist_id: ...
+                # available modes: update, update_retain_order, mirror
+                sync_mode: update
                 # only copy tracks that you've saved to your library?
                 liked_only: false
+                # readd tracks that were manually removed from the destination playlist?
+                readd_removed: false
             }
         },
         {
-            # puts tracks you've liked on the playlist, except tracks that are on one of [other_playlists], and tracks
-            # that are in your saved albums if [check_albums] is set to true
+            # puts tracks you've liked on a playlist
             cmd: update_likes_playlist
             args: {
                 playlist_id: ...
+                # ignore tracks that are on any of these playlists
                 other_playlists: ["...", "...", "..."]
+                # ignore tracks that are in your saved albums?
                 check_albums: true
                 # tracks will be compared by part of their name, instead of full name (ie. if 2 tracks have the same artist
                 # and part of the name of either one appears in the name of the other one, then they are the same track)
@@ -72,8 +83,10 @@
             cmd: update_top_playlist
             args: {
                 playlist_id: ...
-                date_end: null  # unix timestamp, or null to use the current date
-                num_days: null  # null means no lower limit
+                # unix timestamp, or null to use the current date
+                date_end: null
+                # null means no lower limit
+                num_days: null
                 num_tracks: 100
             }
         },
