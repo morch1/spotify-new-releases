@@ -14,12 +14,13 @@ _AUTH_SCOPE = 'playlist-read-private playlist-read-collaborative user-library-re
 
 
 class Spotify:
-    def __init__(self, db, client_id, client_secret, redirect_uri, region, username, update_likes=True):
+    def __init__(self, db, client_id, client_secret, redirect_uri, region, username, update_likes=True, chromedriver_path=None):
         sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id, client_secret, redirect_uri, scope=_AUTH_SCOPE, username=username))
         self.sp = sp
         self.username = username
         self.region = region
         self.db = db
+        self.chromedriver_path = chromedriver_path
 
         c = db.cursor()
         c.execute(f'CREATE TABLE IF NOT EXISTS {_TABLE_LIKES} (track_id TEXT, artist_id TEXT, track_name TEXT, PRIMARY KEY(track_id))')
