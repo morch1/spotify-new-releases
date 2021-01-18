@@ -21,7 +21,7 @@ def get_other_users_follows(user_id, chromedriver_path):
     return dict((link.split('/')[-1], text) for link, text in links if 'open.spotify.com/artist/' in link)
 
 
-def run(config, playlist_id, num_days=30, num_tracks=50, user_id=None):
+def run(config, playlist_id, num_days=30, num_tracks=None, user_id=None):
     spotify = config.spotify
     sp = spotify.sp
     db = spotify.db
@@ -143,17 +143,17 @@ def run(config, playlist_id, num_days=30, num_tracks=50, user_id=None):
         if user_id is None:
             config.join.notify(f'New release(s)', f'{len(new_tracks)} new release(s) by {", ".join(new_artists)}', Join.GROUP_NEW_RELEASES,
                 config.spotify.playlist_url(playlist_id), Join.ICON_SPOTIFY)
-    
-    songs = sp.playlist(playlist_id)['tracks']
-    song_counter = 0
-    to_remove = []
-    while songs:
-        for song in songs['items']:
-            if song_counter >= num_tracks:
-                to_remove.append({'uri': song['track']['id'], 'positions': [song_counter]})
-            song_counter += 1
-        songs = sp.next(songs) if songs['next'] else None
 
-    sp.playlist_remove_specific_occurrences_of_items(playlist_id, to_remove)
+    if num_tracks is not None:
+        songs = sp.playlist(playlist_id)['tracks']
+        song_counter = 0
+        to_remove = []
+        while songs:
+            for song in songs['items']:
+                if song_counter >= num_tracks:
+                    to_remove.append({'uri': song['track']['id'], 'positions': [song_counter]})
+                song_counter += 1
+            songs = sp.next(songs) if songs['next'] else None
+        sp.playlist_remove_specific_occurrences_of_items(playlist_id, to_remove)
     
     config.set_kv('last_releases_update', now)
