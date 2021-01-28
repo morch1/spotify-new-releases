@@ -1,4 +1,4 @@
-def run(config, playlist_id, other_playlists, check_albums=False, by_name_part=False):
+def run(config, playlist_id, other_playlists, check_albums=False, check_followed_artists=False, by_name_part=False):
     spotify = config.spotify
     sp = spotify.sp
 
@@ -12,6 +12,15 @@ def run(config, playlist_id, other_playlists, check_albums=False, by_name_part=F
                 for track in album['album']['tracks']['items']:
                     playlisted_tracks[track['id']] = (track['artists'][0]['id'], track['name'].lower())
             saved_albums = sp.next(saved_albums) if saved_albums['next'] else None
+    
+    if check_followed_artists:
+        print('getting followed artists...')
+        followed_artists = []
+        artists = sp.current_user_followed_artists()['artists']
+        while artists:
+            for artist in artists['items']:
+                followed_artists.append(artist['id'])
+            artists = sp.next(artists)['artists'] if artists['next'] else None
 
     print('getting tracks from playlists...')
     for gpid in other_playlists:
@@ -25,6 +34,8 @@ def run(config, playlist_id, other_playlists, check_albums=False, by_name_part=F
     print('getting saved tracks and comparing...')
     to_add = []
     for track_id, artist, track_name in spotify.get_likes():
+        if check_followed_artists and artist in followed_artists:
+            continue
         track_name = spotify.normalize_track_name(track_name)
         short_name = spotify.shorten_track_name(track_name)
         if not track_id in playlisted_tracks and not any(s1[0] == artist and s1[1] == track_name for _, s1 in playlisted_tracks.items()) \
