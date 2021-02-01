@@ -1,3 +1,5 @@
+import util
+
 def run(config, playlist_id, other_playlists, check_albums=False, check_followed_artists=False, by_name_part=False):
     spotify = config.spotify
     sp = spotify.sp
@@ -10,7 +12,7 @@ def run(config, playlist_id, other_playlists, check_albums=False, check_followed
         while saved_albums:
             for album in saved_albums['items']:
                 for track in album['album']['tracks']['items']:
-                    playlisted_tracks[track['id']] = (track['artists'][0]['id'], track['name'].lower())
+                    playlisted_tracks[track['id']] = (track['artists'][0]['id'], util.normalize_name(track['name']))
             saved_albums = sp.next(saved_albums) if saved_albums['next'] else None
     
     if check_followed_artists:
@@ -33,13 +35,13 @@ def run(config, playlist_id, other_playlists, check_albums=False, check_followed
 
     print('getting saved tracks and comparing...')
     to_add = []
-    for track_id, artist, track_name in spotify.get_likes():
-        if check_followed_artists and artist in followed_artists:
+    for artist_ids, track_id, _, track_name in spotify.liked_tracks:
+        if check_followed_artists and any(artist in followed_artists for artist in artist_ids):
             continue
-        track_name = spotify.normalize_track_name(track_name)
-        short_name = spotify.shorten_track_name(track_name)
-        if not track_id in playlisted_tracks and not any(s1[0] == artist and s1[1] == track_name for _, s1 in playlisted_tracks.items()) \
-            and not (by_name_part and any(s1[0] == artist and (s1[1] in short_name or short_name in s1[1]) for _, s1 in playlisted_tracks.items())):
+        norm_name = util.normalize_name(track_name)
+        short_name = util.shorten_name(track_name)
+        if not track_id in playlisted_tracks and not any(s1[0] == artist_ids[0] and s1[1] == norm_name for _, s1 in playlisted_tracks.items()) \
+            and not (by_name_part and any(s1[0] == artist_ids[0] and (s1[1] in short_name or short_name in s1[1]) for _, s1 in playlisted_tracks.items())):
             to_add.append(track_id)
 
     to_remove = []

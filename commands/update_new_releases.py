@@ -1,7 +1,7 @@
 import progressbar
 import time
 import random
-import requests
+import util
 from services import Join
 from datetime import datetime, timedelta
 from selenium import webdriver
@@ -79,7 +79,7 @@ def run(config, playlist_id, num_days=30, num_tracks=None, user_id=None):
                     for track in songs['items']:
                         if artist not in [a['id'] for a in track['artists']]:
                             continue
-                        track_name = spotify.normalize_track_name(track['name'])
+                        track_name = util.normalize_name(track['name'])
                         c.execute(f'SELECT release_date FROM {table_new_releases} WHERE artist = ? AND track_name = ?', (artist, track_name))
                         db_release_date = (c.fetchone() or (None,))[0]
                         if db_release_date is None or release_date < db_release_date:
@@ -99,8 +99,8 @@ def run(config, playlist_id, num_days=30, num_tracks=None, user_id=None):
                     for track in songs['items']:
                         if artist not in [a['id'] for a in track['artists']]:
                             continue
-                        track_name = spotify.normalize_track_name(track['name'])
-                        short_name = spotify.shorten_track_name(track_name)
+                        track_name = util.normalize_name(track['name'])
+                        short_name = util.shorten_name(track['name'])
                         c.execute(f'SELECT id FROM {table_new_releases} WHERE artist = ? AND track_name LIKE ?', (artist, short_name + '%'))
                         exists = c.fetchone() is not None
                         if not exists:

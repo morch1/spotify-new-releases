@@ -1,13 +1,10 @@
 import argparse
 import hjson
-import json
 import services
 import sqlite3
 from commands import COMMANDS
 from pathlib import Path
 from config import Config
-
-SCOPE = 'playlist-read-private playlist-read-collaborative user-library-read playlist-modify-private playlist-modify-public user-follow-read'
 
 
 def main():
