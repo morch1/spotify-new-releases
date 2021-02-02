@@ -8,6 +8,7 @@ class Config:
         self.join = join
         c = db.cursor()
         c.execute(f'CREATE TABLE IF NOT EXISTS {_TABLE_KV} (k TEXT, v TEXT, PRIMARY KEY(k))')
+        db.commit()
 
     def set_kv(self, k, v):
         c = self.db.cursor()

@@ -27,8 +27,6 @@ def main():
         print('>>> ', task['cmd'], ' '.join(f'{arg}={value}' for arg, value in task['args'].items()))
         COMMANDS[task['cmd']](configObj, **task['args'])
 
-    if not config['db'].get('readonly', False):
-        db.commit()
     db.close()
 
 if __name__ == '__main__':

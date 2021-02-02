@@ -16,6 +16,7 @@ class LastFM:
                 id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp INTEGER, artist_name TEXT, album_name TEXT, song_name TEXT,
                 UNIQUE(timestamp, artist_name, album_name, song_name)
             )''')
+        db.commit()
 
         if (api_key is None and api_secret is None) or not update_scrobbles:
             return
@@ -52,6 +53,7 @@ class LastFM:
         scrob_count += n_new
 
         print(f'+ {n_new} new scrobbles ({scrob_count} total)')
+        db.commit()
 
 
     def get_scrobbles(self, ts_from=0, ts_to=sys.maxsize):

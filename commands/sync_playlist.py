@@ -18,6 +18,7 @@ def run(config, dst_playlist_id, src_playlist_id, sync_mode, liked_only=False, r
             dst_playlist_id TEXT, track_id TEXT, removed INTEGER,
             PRIMARY KEY(dst_playlist_id, track_id))
         ''')
+    db.commit()
 
     print('checking destination playlist...')
     dst_tracks = []
@@ -82,3 +83,4 @@ def run(config, dst_playlist_id, src_playlist_id, sync_mode, liked_only=False, r
                 c.executemany(f'REPLACE INTO {_TABLE_SYNCED_PLAYLISTS} (dst_playlist_id, track_id, removed) VALUES (?, ?, ?)', [(dst_playlist_id, track, 0) for track in tracks])
                 sp.playlist_add_items(dst_playlist_id, tracks)
         print('added', len(to_add))
+    db.commit()

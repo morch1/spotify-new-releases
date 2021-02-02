@@ -17,12 +17,16 @@ class Spotify:
         self.db = db
         self.chromedriver_path = chromedriver_path
 
+        print('getting saved tracks...')
+
         self.liked_tracks = []
         songs = sp.current_user_saved_tracks()
         while songs:
             for song in songs['items']:
                 self.liked_tracks.append(([a['id'] for a in song['track']['artists']], song['track']['id'], [a['name'] for a in song['track']['artists']], song['track']['name']))
             songs = sp.next(songs) if songs['next'] else None
+        
+        print(len(self.liked_tracks), 'saved tracks')
 
     def bulk_search(self, queries, limit=None, show_progressbar=False):
         spotify_tracks = []

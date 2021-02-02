@@ -28,3 +28,4 @@ def run(config, playlist_ids):
                 config.spotify.playlist_url(playlist_id), Join.ICON_SPOTIFY)
 
     config.set_kv('last_notification_update', now)
+    config.db.commit()

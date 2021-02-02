@@ -37,6 +37,8 @@ def run(config, playlist_id, num_days=30, num_tracks=None, user_id=None):
     c = db.cursor()
     c.execute(f'CREATE TABLE IF NOT EXISTS {table_follow_artists} (id TEXT, name TEXT, PRIMARY KEY(id))')
     c.execute(f'CREATE TABLE IF NOT EXISTS {table_new_releases} (id INTEGER PRIMARY KEY AUTOINCREMENT, artist TEXT, track TEXT, album TEXT, release_date TEXT, track_name TEXT, playlisted INTEGER)')
+    db.commit()
+
     last_releases_update = config.get_kv('last_releases_update', now)
     cutoff_date = (datetime.strptime(last_releases_update, '%Y-%m-%d') - timedelta(days=num_days)).strftime('%Y-%m-%d')
 
@@ -111,6 +113,8 @@ def run(config, playlist_id, num_days=30, num_tracks=None, user_id=None):
         bar.update(i)
     bar.finish()
 
+    db.commit()
+
     c.execute(f'SELECT track, album, release_date FROM {table_new_releases} WHERE release_date > ? AND playlisted = ?', (cutoff_date, 0))
     r = c.fetchall()
     new_albums = dict((album, (release_date, [a[0] for a in r if a[1] == album])) for album, release_date in set((a[1], a[2]) for a in r))
@@ -157,3 +161,4 @@ def run(config, playlist_id, num_days=30, num_tracks=None, user_id=None):
         sp.playlist_remove_specific_occurrences_of_items(playlist_id, to_remove)
     
     config.set_kv('last_releases_update', now)
+    db.commit()
