@@ -9,7 +9,7 @@ _AUTH_SCOPE = 'playlist-read-private playlist-read-collaborative user-library-re
 
 
 class Spotify:
-    def __init__(self, db, client_id, client_secret, redirect_uri, region, username, update_likes=True, chromedriver_path=None):
+    def __init__(self, db, client_id, client_secret, redirect_uri, region, username, chromedriver_path=None):
         sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id, client_secret, redirect_uri, scope=_AUTH_SCOPE, username=username))
         self.sp = sp
         self.username = username
