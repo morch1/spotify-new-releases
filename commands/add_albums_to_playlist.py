@@ -1,4 +1,7 @@
 
+from typing import Container
+
+
 def run(config, playlist_id, src_playlist_id):
     spotify = config.spotify
     sp = spotify.sp
@@ -21,6 +24,8 @@ def run(config, playlist_id, src_playlist_id):
     songs = src_playlist['tracks']
     while songs:
         for song in songs['items']:
+            if (song['track']['album']['type'] != 'album'):
+                continue
             album_id = song['track']['album']['id']
             all_albums.append(album_id)
             album_tracks = sp.album_tracks(album_id)
