@@ -24,13 +24,13 @@ def main():
     configObj = Config(db, spotify, lastfm, join)
 
     for task in config['tasks']:
-        print('>>> cmd: ', task['cmd'])
+        print(f'>>> cmd: {task["cmd"]}')
         print('    args: {')
         args = task.get('args', dict())
         for arg, value in args.items():
-            print('      ', arg, ': ', value)
+            print(f'      {arg}: {value}')
         print('    }')
-        print('    comment: "' + task.get('comment', '') + '"')
+        print(f'    comment: "{task.get("comment", "")}"')
         COMMANDS[task['cmd']](configObj, **args)
 
     db.close()
