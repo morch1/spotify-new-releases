@@ -29,7 +29,7 @@ def main():
         args = task.get('args', dict())
         for arg, value in args.items():
             print('      ', arg, ': ', value)
-        print('}')
+        print('    }')
         print('    comment: "', task.get('comment', ''), '"')
         COMMANDS[task['cmd']](configObj, **args)
 
