@@ -30,7 +30,7 @@ def main():
         for arg, value in args.items():
             print('      ', arg, ': ', value)
         print('    }')
-        print('    comment: "', task.get('comment', ''), '"')
+        print('    comment: "' + task.get('comment', '') + '"')
         COMMANDS[task['cmd']](configObj, **args)
 
     db.close()
