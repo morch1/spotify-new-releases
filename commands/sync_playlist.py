@@ -1,5 +1,4 @@
 from config import Config
-import progressbar
 import time
 
 _SYNC_MODES = ['update', 'update_retain_order', 'mirror']
@@ -54,10 +53,7 @@ def run(config: Config, dst_playlist_id: str, src_playlist_id: str, sync_mode: s
     print('updating destination playlist...')
     if sync_mode in ['update_retain_order', 'mirror']:
         n_added, n_moved, n_removed = 0, 0, 0
-        bar = progressbar.ProgressBar(maxval=len(src_tracks))
-        bar.start()
         for i, track in enumerate(src_tracks):
-            bar.update(i)
             c.execute(f'REPLACE INTO {_TABLE_SYNCED_PLAYLISTS} (dst_playlist_id, track_id, removed) VALUES (?, ?, ?)', (dst_playlist_id, track.id, 0))
             try:
                 j = next(k for k, t in enumerate(dst_tracks) if t == track and k >= i)
@@ -76,7 +72,6 @@ def run(config: Config, dst_playlist_id: str, src_playlist_id: str, sync_mode: s
             n_removed = len(to_remove)
             c.executemany(f'DELETE FROM {_TABLE_SYNCED_PLAYLISTS} WHERE dst_playlist_id = ? AND track_id = ?', [(dst_playlist_id, t.id) for t, _ in to_remove if t not in src_tracks])
             dst_playlist.remove_occurences_of_tracks(to_remove)
-        bar.finish()
         print('added', n_added, 'reordered', n_moved, 'removed', n_removed)
     elif sync_mode == 'update':
         to_add = [t for t in src_tracks if t not in dst_tracks]

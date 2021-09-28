@@ -1,9 +1,7 @@
-from collections import defaultdict
-from itertools import count
-import progressbar
 import time
 import spotipy
 import util
+from collections import defaultdict
 from sqlite3.dbapi2 import Connection
 from typing import Iterable, Tuple
 from dataclasses import dataclass
