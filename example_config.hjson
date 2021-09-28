@@ -7,8 +7,6 @@
         redirect_uri: http://localhost:8090
         region: PL
         username: ...
-        # update likes stored in database before running commands?
-        update_likes: true
     }
 
     lastfm: {
@@ -29,15 +27,6 @@
     }
 
     tasks: [
-        {
-            # add recent releases from artists you follow to a playlist, one track per release
-            cmd: update_new_releases
-            args: {
-                playlist_id: ...
-                # only releases no older than this many days old will be detected
-                num_days: 30
-            }
-        },
         {
             # sync one playlist with another
             cmd: sync_playlist
@@ -61,8 +50,10 @@
                 playlist_id: ...
                 # ignore tracks that are on any of these playlists
                 other_playlists: ["...", "...", "..."]
-                # ignore tracks that are in your saved albums?
+                # set to true to skip tracks that are in your saved albums
                 check_albums: true
+                # set to true to skip tracks by your followed artists
+                check_followed_artists: false
                 # tracks will be compared by part of their name, instead of full name (ie. if 2 tracks have the same artist
                 # and part of the name of either one appears in the name of the other one, then they are the same track)
                 by_name_part: true
@@ -115,6 +106,7 @@
             cmd: update_on_this_day
             args: {
                 # year: playlist id
+                2020: ...
                 2019: ...
                 2018: ...
                 2017: ...
@@ -123,11 +115,8 @@
             }
         },
         {
-            # sends a Join notification if tracks were added to any of the specified playlists
+            # sends a Join notification if tracks were added to any of your saved playlists
             cmd: update_playlist_notifications
-            args: {
-                playlist_ids: ["...", "...", "..."]
-            }
         }
     ]
 }
