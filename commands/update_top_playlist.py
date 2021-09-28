@@ -1,17 +1,22 @@
+from services.spotify import SpotifySearchQuery
+from config import Config
 from datetime import datetime
 
-def run(config, playlist_id, date_end=None, num_days=None, num_tracks=100):
-    sp = config.spotify.sp
+def run(config: Config, playlist_id: str, date_end: int = None, num_days: int = None, num_tracks: int = 100):
+    """
+    replaces playlist content with num_tracks most listened tracks in given time period (num_days days ending at date_end)
+    """
+    sp = config.spotify
+    playlist = sp.get_playlist(playlist_id)
 
     ts_to = date_end if date_end is not None else int(datetime.now().timestamp())
     ts_from = ts_to - (num_days * 24 * 60 * 60) if num_days is not None else 0
 
-    print(f'loading top {num_tracks} tracks ({ts_from} - {ts_to}) from scrobble db')
+    print(f'loading top {num_tracks} tracks ({ts_from} - {ts_to}) from scrobble db...')
     lastfm_tracks = config.lastfm.get_top_songs(int(num_tracks * 1.2), ts_from, ts_to)
 
-    print(f'finding tracks on spotify')
-    spotify_tracks = config.spotify.bulk_search([(artist, None, track) for (artist, track), _ in lastfm_tracks], num_tracks, True)
+    print(f'finding tracks on spotify...')
+    spotify_tracks = sp.bulk_search([SpotifySearchQuery(artist, None, track) for (artist, track), _ in lastfm_tracks], num_tracks)
 
-    print('updating playlist')
-    sp.playlist_replace_items(playlist_id, spotify_tracks)
-    print(f'added {len(spotify_tracks)}')
+    print('updating playlist...')
+    playlist.replace_tracks(spotify_tracks)

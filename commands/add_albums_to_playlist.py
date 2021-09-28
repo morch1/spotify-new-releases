@@ -1,53 +1,32 @@
+from config import Config
 
-from typing import Container
 
+def run(config: Config, dst_playlist_id: str, src_playlist_id: str):
+    """
+    for each track on src_playlist_id, adds all tracks from its album to dst_playlist_id
+    """
+    sp = config.spotify
 
-def run(config, playlist_id, src_playlist_id):
-    spotify = config.spotify
-    sp = spotify.sp
+    dst_playlist = sp.get_playlist(dst_playlist_id)
+    src_playlist = sp.get_playlist(src_playlist_id)
 
-    print('getting playlisted tracks...')
-
-    playlisted_tracks = []
-    dst_playlist = sp.playlist(playlist_id)
-    songs = dst_playlist['tracks']
-    while songs:
-        for song in songs['items']:
-            playlisted_tracks.append(song['track']['id'])
-        songs = sp.next(songs) if songs['next'] else None
+    print('getting already playlisted tracks...')
+    already_playlisted = set(dst_playlist.get_tracks())
 
     print('getting album tracks...')
-
     all_albums = []
     to_add = []
-    src_playlist = sp.playlist(src_playlist_id)
-    songs = src_playlist['tracks']
-    while songs:
-        for song in songs['items']:
-            if (song['track']['album']['type'] != 'album'):
-                continue
-            album_id = song['track']['album']['id']
-            all_albums.append(album_id)
-            album_tracks = sp.album_tracks(album_id)
-            while album_tracks:
-                for album_track in album_tracks['items']:
-                    if album_track['id'] not in playlisted_tracks:
-                        to_add.append(album_track['id'])
-                album_tracks = sp.next(album_tracks) if album_tracks['next'] else None
-        songs = sp.next(songs) if songs['next'] else None
+    for t in src_playlist.get_tracks():
+        all_albums.append(t.album)
+        for at in t.album.get_tracks():
+            if at not in already_playlisted:
+                to_add.append(at)
 
     to_remove = []
-    songs = dst_playlist['tracks']
-    while songs:
-        for song in songs['items']:
-            if song['track']['album']['id'] not in all_albums:
-                to_remove.append(song['track']['id'])
-        songs = sp.next(songs) if songs['next'] else None
+    for t in already_playlisted:
+        if t.album not in all_albums:
+            to_remove.append(t)
 
-    if len(to_add) > 0:
-        for i in range(0, len(to_add) // 100 + 1):
-            sp.playlist_add_items(playlist_id, to_add[i * 100 : (i + 1) * 100])
-    if len(to_remove) > 0:
-        for i in range(0, len(to_remove) // 100 + 1):
-            sp.playlist_remove_all_occurrences_of_items(playlist_id, to_remove[i * 100 : (i + 1) * 100])
-    print('added', len(to_add), 'removed', len(to_remove))
+    dst_playlist.add_tracks(to_add)
+    dst_playlist.remove_tracks(to_remove)
+    print(dst_playlist, len(to_add), 'added', len(to_remove), 'removed')

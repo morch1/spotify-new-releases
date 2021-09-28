@@ -24,8 +24,11 @@ def main():
     configObj = Config(db, spotify, lastfm, join)
 
     for task in config['tasks']:
-        print('>>> ', task['cmd'], ' '.join(f'{arg}={value}' for arg, value in task['args'].items()))
-        COMMANDS[task['cmd']](configObj, **task['args'])
+        print('>>> ', task['cmd'])
+        args = task.get('args', dict())
+        for arg, value in args.items():
+            print('      ', arg, '=', value)
+        COMMANDS[task['cmd']](configObj, **args)
 
     db.close()
 

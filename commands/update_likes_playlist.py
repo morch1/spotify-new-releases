@@ -1,64 +1,49 @@
-import util
+from services.spotify import SpotifyTrack
+from config import Config
 
-def run(config, playlist_id, other_playlists, check_albums=False, check_followed_artists=False, by_name_part=False):
-    spotify = config.spotify
-    sp = spotify.sp
+def run(config: Config, dst_playlist_id: str, other_playlists: list[str], check_albums: bool = False, check_followed_artists: bool = False, by_name_part: bool = False):
+    """
+    adds saved tracks for which all of these conditions are met to playlist_id:
+    1. the track is not on any of the other_playlists
+    2. check_albums is False, or the track is not in any of the saved albums
+    3. check_followed_artists is False, or the track is not by any of the followed artists
+    4. by_name_part is False, or the track's name is not a part of another track's name (and vice versa) that doesn't meet these conditions by the same artist
+    """
+    sp = config.spotify
 
-    playlisted_tracks = {}
+    excluded_tracks: set[SpotifyTrack] = set()
 
     if check_albums:
         print('getting tracks from saved albums...')
-        saved_albums = sp.current_user_saved_albums()
-        while saved_albums:
-            for album in saved_albums['items']:
-                for track in album['album']['tracks']['items']:
-                    playlisted_tracks[track['id']] = (track['artists'][0]['id'], util.normalize_name(track['name']))
-            saved_albums = sp.next(saved_albums) if saved_albums['next'] else None
+        for alb in sp.get_saved_albums():
+            excluded_tracks.update(alb.get_tracks())
     
     if check_followed_artists:
         print('getting followed artists...')
-        followed_artists = []
-        artists = sp.current_user_followed_artists()['artists']
-        while artists:
-            for artist in artists['items']:
-                followed_artists.append(artist['id'])
-            artists = sp.next(artists)['artists'] if artists['next'] else None
+        followed_artists = sp.get_followed_artists()
 
     print('getting tracks from playlists...')
-    for gpid in other_playlists:
-        gp = sp.playlist(gpid)
-        songs = gp['tracks']
-        while songs:
-            for song in songs['items']:
-                playlisted_tracks[song['track']['id']] = (song['track']['artists'][0]['id'], song['track']['name'].lower())
-            songs = sp.next(songs) if songs['next'] else None
+    for pid in other_playlists:
+        other_playlist = sp.get_playlist(pid)
+        excluded_tracks.update(other_playlist.get_tracks())
 
     print('getting saved tracks and comparing...')
     to_add = []
-    for artist_ids, track_id, _, track_name in spotify.liked_tracks:
-        if check_followed_artists and any(artist in followed_artists for artist in artist_ids):
+    for t in sp.get_saved_tracks():
+        if check_followed_artists and any(a in followed_artists for a in t.artists):
             continue
-        norm_name = util.normalize_name(track_name)
-        short_name = util.shorten_name(track_name)
-        if not track_id in playlisted_tracks and not any(s1[0] == artist_ids[0] and s1[1] == norm_name for _, s1 in playlisted_tracks.items()) \
-            and not (by_name_part and any(s1[0] == artist_ids[0] and (s1[1] in short_name or short_name in s1[1]) for _, s1 in playlisted_tracks.items())):
-            to_add.append(track_id)
+        if not t in excluded_tracks and not any(exc_t.artists[0] == t.artists[0] and exc_t.normalized_name == t.normalized_name for exc_t in excluded_tracks) \
+            and not (by_name_part and any(exc_t.artists[0] == t.artists[0] and (exc_t.shortened_name in t.normalized_name or t.shortened_name in exc_t.normalized_name) for exc_t in excluded_tracks)):
+            to_add.append(t)
 
     to_remove = []
-    songs = sp.playlist(playlist_id)['tracks']
-    while songs:
-        for song in songs['items']:
-            if song['track']['id'] in to_add:
-                to_add.remove(song['track']['id'])
-            else:
-                to_remove.append(song['track']['id'])
-        songs = sp.next(songs) if songs['next'] else None
+    dst_playlist = sp.get_playlist(dst_playlist_id)
+    for t in dst_playlist.get_tracks():
+        if t in to_add:
+            to_add.remove(t)
+        else:
+            to_remove.append(t)
 
-    print('updating playlist...')
-    if len(to_add) > 0:
-        for i in range(0, len(to_add) // 100 + 1):
-            sp.playlist_add_items(playlist_id, to_add[i * 100 : (i + 1) * 100])
-    if len(to_remove) > 0:
-        for i in range(0, len(to_remove) // 100 + 1):
-            sp.playlist_remove_all_occurrences_of_items(playlist_id, to_remove[i * 100 : (i + 1) * 100])
-    print('added', len(to_add), 'removed', len(to_remove))
+    dst_playlist.add_tracks(to_add)
+    dst_playlist.remove_tracks(to_remove)
+    print(dst_playlist, len(to_add), 'added', len(to_remove), 'removed')

@@ -1,7 +1,13 @@
+from sqlite3.dbapi2 import Connection
+from services.spotify import Spotify
+from services.lastfm import LastFM
+from services.join import Join
+
+
 _TABLE_KV = 'kv'
 
 class Config:
-    def __init__(self, db, spotify, lastfm, join):
+    def __init__(self, db: Connection, spotify: Spotify, lastfm: LastFM, join: Join):
         self.db = db
         self.spotify = spotify
         self.lastfm = lastfm

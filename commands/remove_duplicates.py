@@ -1,37 +1,35 @@
+from config import Config
 import re
 import itertools
 
 _REMIX_REGEX = re.compile(r".*(?: - | \(| \[)(.*)(?:remix| mix|cover|remastered|remaster|edit|live|instrumental)")
 
 
-def run(config, playlist_ids):
-    sp = config.spotify.sp
+def run(config: Config, playlist_ids: list[str]):
+    """
+    removes duplicates from each playlist on playlist_ids list
+    based on track names, not IDs to take different versions of same song into consideration
+    (caution: pretty aggressive and not tested a whole lot so it's likely to remove more than necessary)
+    """
+    sp = config.spotify
 
     for playlist_id in playlist_ids:
-        print(f'checking {playlist_id}')
-        print('getting playlisted tracks...')
+        playlist = sp.get_playlist(playlist_id)
+
+        print(f'getting tracks from playlist {playlist}...')
         tracks = []
-        songs = sp.playlist(playlist_id)['tracks']
-        while songs:
-            for song in songs['items']:
-                name = song['track']['name'].lower()
-                shortname = name.split(' - ')[0].split(' (')[0].split(' [')[0]
-                remix_re = re.search(_REMIX_REGEX, name)
-                rmxartist = remix_re.group(1) if remix_re else None
-                tracks.append((song['track']['id'], song['track']['artists'][0]['name'], name, shortname, rmxartist, song['added_at'], song['added_by']['id']))
-            songs = sp.next(songs) if songs['next'] else None
+        for song in playlist.get_tracks():
+            remix_re = re.search(_REMIX_REGEX, song.normalized_name)
+            rmxartist = remix_re.group(1) if remix_re else None
+            tracks.append((song, rmxartist))
 
         print('finding duplicates...')
         duplicates = []
-        for (i, (t1_id, t1_artist, t1_name, t1_short, t1_rmxartist, t1_added_at, t1_added_by)), (j, (t2_id, t2_artist, t2_name, t2_short, t2_rmxartist, t2_added_at, t2_added_by)) in itertools.product(enumerate(tracks), enumerate(tracks)):
-            if i != j and t1_artist == t2_artist and t1_short == t2_short and t1_rmxartist == t2_rmxartist and t1_added_at <= t2_added_at and not any(x['uri'] == t1_id and i in x['positions'] for x in duplicates):
-                duplicates.append({'uri': t2_id, 'positions': [j]})
-                print(t1_added_at, t1_added_by, t1_artist, '-', t1_name)
-                print(t2_added_at, t2_added_by, t2_artist, '-', t2_name, '[ DUPLICATE ]')
-                print()
+        for (i, (t1, t1_rmxartist)), (j, (t2, t2_rmxartist)) in itertools.product(enumerate(tracks), enumerate(tracks)):
+            if i != j and t1.artists[0] == t2.artists[0] and t1.shortened_name == t2.shortened_name and t1_rmxartist == t2_rmxartist and t1.date_added <= t2.date_added and not any(dup == t1 and dup_pos == i for dup, dup_pos in duplicates):
+                duplicates.append((t2, j))
+                print(t1.date_added, t1.added_by, t1.artists[0], '-', t1)
+                print(t2.date_added, t2.added_by, t2.artists[0], '-', t2, '[ DUPLICATE ]')
 
-        print('updating playlist...')
-        if len(duplicates) > 0:
-            for i in range(0, len(duplicates) // 100 + 1):
-                sp.playlist_remove_specific_occurrences_of_items(playlist_id, duplicates[i * 100 : (i + 1) * 100])
-        print('removed', len(duplicates))
+        playlist.remove_occurences_of_tracks(duplicates)
+        print(playlist, len(duplicates), 'duplicates removed')
