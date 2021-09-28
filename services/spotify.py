@@ -211,18 +211,22 @@ class Spotify:
     def get_user(self, user_id: str) -> SpotifyUser:
         return SpotifyUser(self, self.sp.user(user_id))
 
+    @util.memoize
     def get_saved_tracks(self) -> Iterable[SpotifyTrack]:
         for song in self.iterate(self.sp.current_user_saved_tracks()):
             yield SpotifyTrack(self, song['track'])
 
+    @util.memoize
     def get_saved_albums(self) -> Iterable[SpotifyAlbum]:
         for album in self.iterate(self.sp.current_user_saved_albums()):
             yield SpotifyAlbum(self, album['album'])
 
+    @util.memoize
     def get_playlists(self) -> Iterable[SpotifyPlaylist]:
         for playlist in self.iterate(self.sp.user_playlists(self.username)):
             yield SpotifyPlaylist(self, playlist)
 
+    @util.memoize
     def get_followed_artists(self) -> Iterable[SpotifyArtist]:
         for a in self.iterate(self.sp.current_user_followed_artists(), 'artists'):
             yield SpotifyArtist(self, a)
