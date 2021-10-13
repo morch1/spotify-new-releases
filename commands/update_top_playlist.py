@@ -5,6 +5,7 @@ from datetime import datetime
 def run(config: Config, playlist_id: str, date_end: int = None, num_days: int = None, num_tracks: int = 100):
     """
     replaces playlist content with num_tracks most listened tracks in given time period (num_days days ending at date_end)
+    if date_end is Null then the current date is used
     """
     sp = config.spotify
     playlist = sp.get_playlist(playlist_id)
