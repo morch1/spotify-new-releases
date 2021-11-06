@@ -10,7 +10,7 @@ def run(config: Config, dst_playlist_id: str, ignore_suffix: str, by_name_part: 
 
     excluded_tracks: set[SpotifyTrack] = set()
 
-    other_playlists = (p for p in sp.get_playlists() if p.owner == sp.username and p.description.endswith(ignore_suffix))
+    other_playlists = (p for p in sp.get_playlists() if p.id != dst_playlist_id and p.owner == sp.username and p.description.endswith(ignore_suffix))
 
     print('getting tracks from playlists...')
     for other_playlist in other_playlists:
