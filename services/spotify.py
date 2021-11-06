@@ -88,6 +88,7 @@ class SpotifyTrack(SpotifyObject):
 class SpotifyPlaylist(SpotifyObject):
     def __post_init__(self):
         super().__post_init__()
+        self.description = self.data['description']
         self.is_collaborative = self.data['collaborative']
         self.owner = self.data['owner']['id']
 
@@ -99,6 +100,8 @@ class SpotifyPlaylist(SpotifyObject):
         self.spotify.sp.playlist_change_details(self.id, name=name, description=description)
         if name is not None:
             self.name = name
+        if description is not None:
+            self.description = description
 
     def get_tracks(self):
         for song in self.spotify.iterate(self.spotify.sp.playlist_tracks(self.id)):

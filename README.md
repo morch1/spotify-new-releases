@@ -55,9 +55,16 @@ python spotify-utils.py config_file.hjson
             }
         },
         {
+            cmd: update_likes_playlist2
+            args: {
+                dst_playlist_id: ...
+                ignore_suffix: ...
+            }
+        },
+        {
             cmd: update_likes_playlist
             args: {
-                playlist_id: ...
+                dst_playlist_id: ...
                 other_playlists: [
                     "...",
                     "...",
