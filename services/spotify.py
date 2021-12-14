@@ -233,3 +233,7 @@ class Spotify:
     def get_followed_artists(self) -> Iterable[SpotifyArtist]:
         for a in self.iterate(self.sp.current_user_followed_artists(), 'artists'):
             yield SpotifyArtist(self, a)
+
+    @util.memoize
+    def is_following_user(self, user_id: str) -> bool:
+        return self.sp.current_user_following_users([user_id])[0]
