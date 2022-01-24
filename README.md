@@ -5,9 +5,11 @@
 python spotify-utils.py config_file.hjson
 ```
 
-## config file example:
+## config.hjson file example:
 ```
 {
+    # this part of the file contains basic config such as API credentials for services etc
+    
     # some tasks need to store data locally
     db_path: C:\path\to\database.db
 
@@ -43,7 +45,7 @@ python spotify-utils.py config_file.hjson
         ]
     }
 
-    # list of tasks to perform when this config file is used
+    # below is the list of tasks to perform when this config file is used
     # look inside commands/(name of task).py for explanation of arguments
     tasks: [
         {
