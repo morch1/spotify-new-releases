@@ -196,7 +196,7 @@ class Spotify:
             sr = self.sp.search(q=f'artist:{query.artist_name} {query.album_name if query.album_name is not None else ""} track:{query.track_name}', type='track', limit=10, market=self.region)
             if len(sr['tracks']['items']) == 0 and query.album_name is not None:
                 sr = self.sp.search(q=f'artist:{query.artist_name} track:{query.track_name}', type='track', limit=10, market=self.region)
-            sr2 = [s for s in sr['tracks']['items'] if s['name'] == query.track_name]
+            sr2 = [s for s in sr['tracks']['items'] if s['name'] == query.track_name and query.artist_name in [a['name'] for a in s['artists']]]
             if len(sr2) == 0:
                 sr2 = sr['tracks']['items']
             if len(sr2) > 0:
