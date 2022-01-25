@@ -20,7 +20,7 @@ class Scrobble:
 
 
 class LastFM:
-    def __init__(self, db: Connection, api_key: str = None, api_secret: str = None, username: str = None, password_hash: str = None, update_scrobbles: bool = True):
+    def __init__(self, db: Connection, api_key: str = None, api_secret: str = None, username: str = None, password_hash: str = None):
         self.db = db
         c = db.cursor()
         c.execute(f'''CREATE TABLE IF NOT EXISTS {_TABLE_SCROBBLES} (
@@ -29,11 +29,20 @@ class LastFM:
             )''')
         db.commit()
 
-        if (api_key is None and api_secret is None) or not update_scrobbles:
+        if api_key is None and api_secret is None:
+            self.network = None
+            self.user = None
             return
 
         self.network = pylast.LastFMNetwork(api_key=api_key, api_secret=api_secret, username=username, password_hash=password_hash)
         self.user = self.network.get_user(username)
+
+    def update_scrobble_cache(self):
+        if self.user is None:
+            return
+            
+        db = self.db
+        c = db.cursor()
 
         c.execute(f'SELECT COUNT(id), MAX(timestamp) FROM {_TABLE_SCROBBLES}')
         scrob_count, last_timestamp = c.fetchone()

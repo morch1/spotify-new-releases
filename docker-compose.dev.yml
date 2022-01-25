@@ -1,0 +1,8 @@
+version: '3.8'
+
+services:
+  spotify_utils:
+    ports:
+      - 3000:3000  # debugger
+    environment:
+      - DEBUG=1

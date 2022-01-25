@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  spotify_utils:
+    build: ./app
+    command: python spotify_utils.py
+    volumes:
+      - ./config.hjson:/etc/spotify-utils.hjson
+      - ./data/:/var/lib/spotify-utils/
