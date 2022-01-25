@@ -10,7 +10,7 @@ from datetime import datetime
 
 
 def main():
-    if os.getenv('DEBUG', 0):
+    if int(os.getenv('DEBUG', '0')):
         import debugpy
         debugpy.listen(("0.0.0.0", 3000))
         debugpy.wait_for_client()
