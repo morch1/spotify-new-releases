@@ -7,3 +7,4 @@ services:
     volumes:
       - ./config.hjson:/etc/spotify-utils.hjson
       - ./data/:/var/lib/spotify-utils/
+    restart: unless-stopped
