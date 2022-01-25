@@ -7,7 +7,7 @@ from typing import Iterable, Tuple
 from dataclasses import dataclass
 from spotipy.oauth2 import SpotifyOAuth
 
-_AUTH_SCOPE = 'playlist-read-private playlist-read-collaborative user-library-read playlist-modify-private playlist-modify-public user-follow-read'
+AUTH_SCOPE = 'playlist-read-private playlist-read-collaborative user-library-read playlist-modify-private playlist-modify-public user-follow-read'
 
 ICON_SPOTIFY = 'https%3A%2F%2Fwww.iconsdb.com%2Ficons%2Fdownload%2Fwhite%2Fspotify-64.png'
 
@@ -172,8 +172,17 @@ class SpotifySearchQuery:
 
 
 class Spotify:
-    def __init__(self, db: Connection, client_id: str, client_secret: str, redirect_uri: str, region: str, username: str):
-        sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id, client_secret, redirect_uri, scope=_AUTH_SCOPE, username=username))
+    def __init__(self, db: Connection, client_id: str, client_secret: str, region: str, username: str):
+        auth_manager = SpotifyOAuth(client_id, 
+                client_secret, 
+                'http://localhost', 
+                scope=AUTH_SCOPE, 
+                username=username, 
+                cache_path='/var/lib/spotify-utils/.spotipy-cache', 
+                open_browser=False
+            )
+        sp = spotipy.Spotify(auth_manager=auth_manager)
+
         self.sp = sp
         self.username = username
         self.region = region

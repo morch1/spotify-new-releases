@@ -1,0 +1,7 @@
+spotipy==2.19.0
+pylast==3.3.0
+hjson==3.0.2
+unidecode==1.1.2
+apscheduler==3.8.1
+tzlocal<3.0
+debugpy==1.5.1

@@ -1,0 +1,115 @@
+# rename this file to config.hjson and modify to suit your needs
+{
+    # spotify api info
+    spotify: {
+        client_id: ...
+        client_secret: ...
+        redirect_uri: http://localhost:8090
+        region: PL
+        username: ...
+    }
+
+    # lastfm api info
+    lastfm: {
+        # set all to null if you dont use last.fm (some tasks won't work)
+        api_key: ...
+        api_secret: ...
+        username: ...
+        password_hash: ...
+    }
+
+    # join api info (for notifications)
+    join: {
+        # set both fields to null to disable notifications
+        api_key: ...
+        # these devices will receive notifications:
+        device_ids: [
+            "...",
+            "...",
+            "...",
+        ]
+    }
+
+    # below is the list of schedules to run
+    # each schedule contains a list of tasks to perform
+    # look inside commands/(name of task).py for explanation of tasks and their arguments
+    schedules: [
+        {
+            name: 5min schedule
+            cron: {
+                # run every 5 mins
+                minute: */5
+            }
+            tasks: [
+                {
+                    cmd: sync_playlist
+                    args: {
+                        dst_playlist_id: ...
+                        src_playlist_id: ...
+                        sync_mode: update
+                    }
+                },
+                {
+                    cmd: update_likes_playlist2
+                    args: {
+                        dst_playlist_id: ...
+                        ignore_suffix: ...
+                    }
+                },
+                {
+                    cmd: update_playlist_notifications
+                }
+            ]
+        },
+        {
+            name: midnight schedule
+            cron: {
+                # run every day at midnight
+                hour: 0
+            }
+            tasks: [
+                {
+                    cmd: update_scrobble_cache
+                },
+                {
+                    cmd: remove_duplicates
+                    args: {
+                        playlist_ids: [
+                            "...",
+                            "...",
+                            "...",
+                        ]
+                    }
+                },
+                {
+                    cmd: update_top_playlist
+                    args: {
+                        playlist_id: ...
+                        num_days: 365
+                        num_tracks: 100
+                    }
+                },
+                {
+                    cmd: update_top_playlist
+                    args: {
+                        playlist_id: ...
+                        date_end: 1577836800
+                        num_days: 30
+                        num_tracks: 30
+                    }
+                },
+                {
+                    cmd: update_on_this_day
+                    args: {
+                        2020: ...
+                        2019: ...
+                        2018: ...
+                        2017: ...
+                        2016: ...
+                        2015: ...
+                    }
+                },
+            ]
+        },
+    ]
+}

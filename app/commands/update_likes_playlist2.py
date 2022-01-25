@@ -8,13 +8,15 @@ def run(config: Config, dst_playlist_id: str, ignore_suffix: str, by_name_part: 
 
     sp = config.spotify
 
-    excluded_tracks: set[SpotifyTrack] = set()
+    excluded_tracks: list[SpotifyTrack] = []
 
     other_playlists = (p for p in sp.get_playlists() if p.id != dst_playlist_id and p.owner == sp.username and p.description.endswith(ignore_suffix))
 
     print('getting tracks from playlists...')
     for other_playlist in other_playlists:
-        excluded_tracks.update(other_playlist.get_tracks())
+        excluded_tracks.extend(other_playlist.get_tracks())
+
+    excluded_tracks = set(excluded_tracks)
 
     print('getting saved tracks and comparing...')
     to_add = []
