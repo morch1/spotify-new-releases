@@ -32,7 +32,6 @@ WORKDIR $APP_HOME
 COPY . $APP_HOME
 
 RUN chown -R app:app $APP_HOME
-RUN mkdir $HOME/auth && chown -R app:app $HOME/auth
 RUN mkdir $HOME/data && chown -R app:app $HOME/data
 
 USER app

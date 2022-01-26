@@ -6,9 +6,8 @@ services:
     command: python spotify_utils.py
     volumes:
       - ./config.hjson:/home/app/config.hjson:ro
-      - ./data/:/home/app/data/
-      - auth:/home/app/auth/
+      - spotify_utils_data:/home/app/data/
     restart: unless-stopped
 
 volumes:
-  auth:
+  spotify_utils_data:

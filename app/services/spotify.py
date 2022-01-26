@@ -178,7 +178,7 @@ class Spotify:
                 'http://localhost', 
                 scope=AUTH_SCOPE, 
                 username=username, 
-                cache_path='/home/app/auth/.spotipy-cache', 
+                cache_path='/home/app/data/.spotipy-cache', 
                 open_browser=False
             )
         sp = spotipy.Spotify(auth_manager=auth_manager)

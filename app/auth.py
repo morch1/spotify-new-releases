@@ -17,7 +17,7 @@ def main():
             'http://localhost', 
             scope=AUTH_SCOPE, 
             username=username, 
-            cache_path='/home/app/auth/.spotipy-cache', 
+            cache_path='/home/app/data/.spotipy-cache', 
             open_browser=False
         )
 
