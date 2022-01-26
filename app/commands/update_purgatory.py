@@ -3,7 +3,7 @@ from config import Config
 
 def run(config: Config, dst_playlist_id: str, ignore_suffix: str, by_name_part: bool = False):
     """
-    adds to playlist_id all saved tracks that are not on any playlist that has ignore_suffix at the end of its description
+    adds to playlist_id (the purgatory) all liked tracks that are not on any playlist that has ignore_suffix at the end of its description
     """
 
     sp = config.spotify
@@ -18,7 +18,7 @@ def run(config: Config, dst_playlist_id: str, ignore_suffix: str, by_name_part: 
 
     excluded_tracks = set(excluded_tracks)
 
-    print('getting saved tracks and comparing...')
+    print('getting liked tracks and comparing...')
     to_add = []
     for t in sp.get_saved_tracks():
         if not t in excluded_tracks and not any(exc_t.artists[0] == t.artists[0] and exc_t.normalized_name == t.normalized_name for exc_t in excluded_tracks) \

@@ -5,6 +5,10 @@ services:
     build: ./app
     command: python spotify_utils.py
     volumes:
-      - ./config.hjson:/etc/spotify-utils.hjson
-      - ./data/:/var/lib/spotify-utils/
+      - ./config.hjson:/home/app/config.hjson:ro
+      - ./data/:/home/app/data/
+      - auth:/home/app/auth/
     restart: unless-stopped
+
+volumes:
+  auth:

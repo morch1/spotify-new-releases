@@ -4,7 +4,7 @@ from spotipy.oauth2 import SpotifyOAuth
 from services.spotify import AUTH_SCOPE
 
 def main():
-    with open('/etc/spotify-utils.hjson', 'r', encoding='utf-8') as cf:
+    with open('/home/app/config.hjson', 'r', encoding='utf-8') as cf:
         config = hjson.load(cf)
 
     client_id = config['spotify']['client_id']
@@ -17,7 +17,7 @@ def main():
             'http://localhost', 
             scope=AUTH_SCOPE, 
             username=username, 
-            cache_path='/var/lib/spotify-utils/.spotipy-cache', 
+            cache_path='/home/app/auth/.spotipy-cache', 
             open_browser=False
         )
 

@@ -3,6 +3,7 @@ import services
 import sqlite3
 import os
 import pytz
+import argparse
 from commands import COMMANDS
 from config import Config
 from apscheduler.schedulers.background import BlockingScheduler
@@ -16,17 +17,23 @@ def main():
         debugpy.wait_for_client()
         print('Attached!')
 
-    with open('/etc/spotify-utils.hjson', 'r', encoding='utf-8') as cf:
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--run_once', required=False, default=None)
+    args = parser.parse_args()
+
+    with open('/home/app/config.hjson', 'r', encoding='utf-8') as cf:
         config = hjson.load(cf)
 
     scheduler = BlockingScheduler(timezone=pytz.timezone(config.get('timezone', 'UTC')))
 
     for schedule in config['schedules']:
-        
+        if args.run_once is not None and schedule['name'] != args.run_once:
+            continue
+
         def do_tasks(schedule=schedule):
             print(f'[{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}] running schedule {schedule["name"]}')
 
-            db = sqlite3.connect('/var/lib/spotify-utils/db.sqlite3')
+            db = sqlite3.connect('/home/app/data/db.sqlite3')
 
             lastfm = services.LastFM(db, **config.get('lastfm', {}))
             join = services.Join(**config.get('join', {}))
@@ -44,13 +51,17 @@ def main():
             db.close()
             print(f'[{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}] finished running schedule {schedule["name"]}')
 
-        cron = schedule['cron']
-        scheduler.add_job(do_tasks, 'cron', **cron)
+        if args.run_once is None:
+            cron = schedule['cron']
+            scheduler.add_job(do_tasks, 'cron', **cron)
+        else:
+            do_tasks()
 
-    try:
-        scheduler.start()
-    except KeyboardInterrupt:
-        return
+    if args.run_once is None:
+        try:
+            scheduler.start()
+        except KeyboardInterrupt:
+            return
 
 
 if __name__ == '__main__':
